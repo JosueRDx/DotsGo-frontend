@@ -1,0 +1,65 @@
+.logoPickerMainContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #1f2937;
+  margin: 0;
+  text-align: center;
+}
+
+.logoOptionsWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start; /* nuevo */
+  gap: 16px;
+  padding: 10px;
+  max-width: 1000px; /* más ancho para permitir más logos por fila */
+  width: 100%;
+}
+
+.logoButton {
+  width: 90px;
+  height: 130px;
+  flex: 0 0 auto; /* <--- clave para que se mantenga el tamaño fijo horizontalmente */
+  border: 2px solid #ddd;
+  background: white;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.logoButton:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+  border-color: #3b82f6;
+}
+
+.logoImage {
+  max-width: 50px;
+  max-height: 50px;
+  object-fit: contain;
+  margin-bottom: 6px;
+}
+
+.logoNameText {
+  font-size: 0.72rem;
+  color: #444;
+  text-align: center;
+  line-height: 1.2;
+  word-break: break-word;
+}

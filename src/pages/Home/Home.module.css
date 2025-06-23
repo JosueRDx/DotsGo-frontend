@@ -1,0 +1,823 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* Reset global para eliminar márgenes y espacios */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  /* CAMBIADO: Permitir scroll vertical */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.homeContainer {
+  /* CAMBIADO: De fixed a relative para permitir scroll natural */
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  min-height: 100vh; /* CAMBIADO: De height fijo a min-height */
+  /* CAMBIADO: Remover overflow hidden para permitir scroll */
+  overflow: visible;
+  font-family: 'Poppins', sans-serif;
+  z-index: 1;
+}
+
+/* NUEVO: Fondo fijo que cubre toda la pantalla siempre */
+.homeContainer::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(270deg, #000000, #1a0033, #2d1b69, #1a0033, #000000);
+  background-size: 400% 400%;
+  animation: purpleWave 12s ease-in-out infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Header - Mantener fijo en la parte superior */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+  /* MANTENER: Header fijo en la parte superior */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.headerLogo {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+.headerTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.createGameBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  font-size: 14px;
+}
+
+.createGameBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+/* Hero Section */
+.heroSection {
+  /* CAMBIADO: Agregar padding-top para compensar el header fijo */
+  padding: 140px 40px 60px; /* 140px top para compensar header + espacio */
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 5;
+  /* CAMBIADO: Remover min-height fijo */
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* CAMBIADO: De center a flex-start */
+  /* CAMBIADO: Permitir scroll vertical */
+  overflow-y: visible;
+}
+
+.heroContent {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 60px;
+  align-items: center;
+  margin-bottom: 60px;
+}
+
+.heroLeft {
+  color: white;
+}
+
+.heroTitle {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 24px;
+  text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.highlight {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+}
+
+.heroDescription {
+  font-size: 18px;
+  line-height: 1.6;
+  opacity: 0.9;
+  margin-bottom: 50px;
+  max-width: 500px;
+}
+
+/* Stats Section */
+.statsSection {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.statItem:hover {
+  transform: translateY(-5px);
+  background: rgba(139, 92, 246, 0.2);
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.6);
+}
+
+.statIconContainer {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.statInfo {
+  flex: 1;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 13px;
+  opacity: 0.8;
+  color: white;
+  line-height: 1.2;
+}
+
+/* PIN Card */
+.pinCard {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(139, 92, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+.pinCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 40px rgba(139, 92, 246, 0.4);
+  border-color: rgba(139, 92, 246, 0.6);
+}
+
+.pinCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: white;
+}
+
+.pinCardHeader h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.pinInputSection {
+  margin-bottom: 20px;
+}
+
+.pinInput {
+  width: 100%;
+  padding: 18px;
+  border: 2px solid rgba(139, 92, 246, 0.4);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.pinInput::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  letter-spacing: normal;
+}
+
+.pinInput:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.3), 0 0 20px rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.joinBtn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.joinBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+}
+
+.joinBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.joinBtn.loading {
+  pointer-events: none;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.pinHelp {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+}
+
+.link {
+  color: #a855f7;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.link:hover {
+  color: #c084fc;
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+
+/* Features Section */
+.featuresSection {
+  margin-top: 40px;
+  /* CAMBIADO: Remover flex: 1 para permitir crecimiento natural */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* CAMBIADO: De center a flex-start */
+  /* AGREGADO: Padding bottom para espacio al final */
+  padding-bottom: 60px;
+}
+
+.featuresTitle {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 40px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.featureCard {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.featureCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.6);
+}
+
+.featureIcon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  transition: all 0.3s ease;
+}
+
+.featureCard:hover .featureIcon {
+  transform: scale(1.1);
+}
+
+.featureTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: white;
+}
+
+.featureDescription {
+  opacity: 0.8;
+  line-height: 1.5;
+  color: white;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Particles Animation */
+.particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.particle {
+  position: absolute;
+  background: linear-gradient(45deg, rgba(139, 92, 246, 0.3), rgba(168, 85, 247, 0.2));
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+}
+
+.particle1 { width: 6px; height: 6px; top: 15%; left: 8%; animation-delay: 0s; }
+.particle2 { width: 10px; height: 10px; top: 45%; left: 15%; animation-delay: 1s; }
+.particle3 { width: 4px; height: 4px; top: 25%; left: 85%; animation-delay: 2s; }
+.particle4 { width: 8px; height: 8px; top: 70%; left: 75%; animation-delay: 3s; }
+.particle5 { width: 12px; height: 12px; top: 20%; left: 60%; animation-delay: 4s; }
+.particle6 { width: 6px; height: 6px; top: 60%; left: 35%; animation-delay: 5s; }
+.particle7 { width: 14px; height: 14px; top: 10%; left: 90%; animation-delay: 6s; }
+.particle8 { width: 8px; height: 8px; top: 80%; left: 10%; animation-delay: 7s; }
+
+/* Responsive Design Optimizado */
+@media (max-width: 1200px) {
+  .heroContent {
+    grid-template-columns: 1fr 360px;
+    gap: 40px;
+  }
+  
+  .heroTitle {
+    font-size: 50px;
+  }
+
+  .heroSection {
+    padding: 130px 30px 50px; /* AJUSTADO: padding-top para header fijo */
+  }
+}
+
+@media (max-width: 1024px) {
+  .heroContent {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .heroTitle {
+    font-size: 44px;
+  }
+  
+  .statsSection {
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .statItem {
+    min-width: 200px;
+    flex: 1;
+    max-width: 250px;
+  }
+
+  .heroSection {
+    /* CAMBIADO: height auto y padding ajustado */
+    height: auto;
+    min-height: auto;
+    padding: 120px 25px 40px;
+  }
+
+  .pinCard {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .featuresGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 15px 20px;
+    flex-direction: row;
+    gap: 15px;
+  }
+
+  .headerLogo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .headerTitle {
+    font-size: 20px;
+  }
+
+  .createGameBtn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .heroSection {
+    padding: 110px 20px 30px; /* AJUSTADO: padding-top para header más pequeño */
+    min-height: auto;
+    justify-content: flex-start;
+  }
+
+  .heroContent {
+    margin-bottom: 40px;
+  }
+
+  .heroTitle {
+    font-size: 36px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .heroDescription {
+    font-size: 16px;
+    max-width: none;
+    margin-bottom: 30px;
+  }
+
+  .statsSection {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+
+  .statItem {
+    width: 100%;
+    max-width: 300px;
+    padding: 18px;
+    min-width: auto;
+  }
+
+  .statValue {
+    font-size: 24px;
+  }
+
+  .statLabel {
+    font-size: 12px;
+  }
+
+  .pinCard {
+    padding: 24px;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .pinCardHeader h3 {
+    font-size: 18px;
+  }
+
+  .pinInput {
+    font-size: 16px;
+    padding: 16px;
+    letter-spacing: 2px;
+  }
+
+  .featuresSection {
+    margin-top: 30px;
+    padding-bottom: 40px; /* AJUSTADO: padding bottom para móviles */
+  }
+
+  .featuresGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .featuresTitle {
+    font-size: 26px;
+    margin-bottom: 30px;
+  }
+
+  .featureCard {
+    padding: 20px;
+  }
+
+  .featureIcon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 16px;
+  }
+
+  .featureTitle {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .featureDescription {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 12px 15px;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .headerLogo {
+    width: 35px;
+    height: 35px;
+  }
+
+  .headerTitle {
+    font-size: 18px;
+  }
+
+  .createGameBtn {
+    padding: 8px 14px;
+    font-size: 12px;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .heroSection {
+    padding: 130px 15px 20px; /* AJUSTADO: más padding-top por header en columna */
+    min-height: auto;
+  }
+
+  .heroTitle {
+    font-size: 28px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .heroDescription {
+    font-size: 14px;
+    margin-bottom: 25px;
+    line-height: 1.4;
+  }
+
+  .statsSection {
+    gap: 12px;
+    margin-bottom: 25px;
+  }
+
+  .statItem {
+    padding: 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    max-width: 280px;
+  }
+
+  .statIconContainer {
+    width: 40px;
+    height: 40px;
+  }
+
+  .statValue {
+    font-size: 20px;
+  }
+
+  .statLabel {
+    font-size: 11px;
+  }
+
+  .pinCard {
+    padding: 20px;
+  }
+
+  .pinCardHeader {
+    margin-bottom: 20px;
+  }
+
+  .pinCardHeader h3 {
+    font-size: 16px;
+  }
+
+  .pinInput {
+    font-size: 14px;
+    padding: 14px;
+    letter-spacing: 1px;
+  }
+
+  .joinBtn {
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .pinHelp {
+    font-size: 12px;
+  }
+
+  .featuresSection {
+    margin-top: 20px;
+    padding-bottom: 30px; /* AJUSTADO: padding bottom para móviles pequeños */
+  }
+
+  .featuresTitle {
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .featuresGrid {
+    gap: 12px;
+  }
+
+  .featureCard {
+    padding: 16px;
+  }
+
+  .featureIcon {
+    width: 45px;
+    height: 45px;
+    margin-bottom: 12px;
+  }
+
+  .featureIcon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .featureTitle {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .featureDescription {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 360px) {
+  .heroTitle {
+    font-size: 24px;
+  }
+
+  .heroDescription {
+    font-size: 13px;
+  }
+
+  .pinCard {
+    padding: 16px;
+  }
+
+  .featuresTitle {
+    font-size: 20px;
+  }
+
+  .statItem {
+    max-width: 260px;
+  }
+
+  .heroSection {
+    padding: 140px 15px 20px; /* AJUSTADO: aún más padding-top para pantallas muy pequeñas */
+  }
+}
+
+/* Animations */
+@keyframes purpleWave {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 75%;
+  }
+  50% {
+    background-position: 200% 25%;
+  }
+  75% {
+    background-position: 300% 75%;
+  }
+  100% {
+    background-position: 400% 50%;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+    opacity: 0.2;
+  }
+  50% { 
+    transform: translateY(-40px) rotate(180deg); 
+    opacity: 0.6;
+  }
+}
+
+/* Hover effects */
+.heroTitle .highlight::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent, rgba(251, 191, 36, 0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.heroTitle:hover .highlight::after {
+  opacity: 1;
+}

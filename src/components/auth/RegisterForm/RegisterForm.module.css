@@ -1,0 +1,67 @@
+
+.contenedorRegistro {
+    background-color: rgba(255, 255, 255, 0.9); 
+    padding: 40px; 
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    width: 400px; 
+    max-width: 90%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px; 
+    margin: auto;
+}
+
+.tituloRegistro {
+    color: black;
+    margin-bottom: 25px;
+    font-size: 2.2rem;
+    font-weight: bold;
+}
+
+
+.labelRegistro {
+    width: 100%;
+    text-align: left;
+    font-weight: bold;
+    color: #333;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.inputRegistro {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    background-color: white;
+    color: #030303;
+}
+
+.inputRegistro::placeholder {
+    color: #999;
+    opacity: 1;
+}
+
+.botonRegistro {
+    background-color: black;
+    border: none;
+    padding: 15px;
+    border-radius: 30px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1.3rem;
+    transition: opacity 0.3s ease;
+}
+
+
+
+.botonRegistro:hover {
+    opacity: 0.9;
+}

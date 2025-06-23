@@ -1,0 +1,239 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* Header - Mantener fijo en la parte superior */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+  /* MANTENER: Header fijo en la parte superior */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.headerLogo {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+.headerTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.createGameBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  font-size: 14px;
+}
+
+.createGameBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+/* Temporizador */
+.timer {
+  font-size: 1.2rem;
+  font-weight: bold;
+  background-color: #4a5568;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  margin-left: auto; /* Para alinearlo a la derecha */
+  transition: all 0.3s ease;
+}
+
+.timer.lowTime {
+  background-color: #e53e3e;
+  animation: pulse 1s infinite;
+}
+
+/* Animacion del temporizador */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* NUEVO: Character Display - Integrado con tu estilo */
+.characterDisplay {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(139, 92, 246, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  transition: all 0.3s ease;
+  margin: 0 15px;
+}
+
+.characterDisplay:hover {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.6);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.characterAvatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 10px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+  transition: transform 0.3s ease;
+}
+
+.characterDisplay:hover .characterAvatar {
+  transform: scale(1.05);
+}
+
+.characterInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.characterName {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.characterSpecialty {
+  font-size: 11px;
+  color: #c084fc;
+  font-weight: 500;
+  opacity: 0.9;
+  line-height: 1.2;
+}
+
+/* Responsive para mantener tu estilo */
+@media (max-width: 768px) {
+  .header {
+    padding: 15px 20px;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 80px;
+  }
+
+  .logoSection {
+    order: 1;
+    flex: 1;
+  }
+
+  .headerTitle {
+    font-size: 20px;
+  }
+
+  .headerLogo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .createGameBtn {
+    order: 2;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .characterDisplay {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: center;
+    margin: 10px 0 5px 0;
+    padding: 8px 16px;
+  }
+
+  .characterAvatar {
+    width: 35px;
+    height: 35px;
+  }
+
+  .characterName {
+    font-size: 13px;
+  }
+
+  .characterSpecialty {
+    font-size: 10px;
+  }
+
+  .timer {
+    order: 4;
+    margin: 5px auto 0 auto;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 12px 15px;
+  }
+
+  .headerTitle {
+    font-size: 18px;
+  }
+
+  .headerLogo {
+    width: 35px;
+    height: 35px;
+  }
+
+  .createGameBtn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .characterDisplay {
+    padding: 6px 12px;
+    gap: 8px;
+  }
+
+  .characterAvatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .characterName {
+    font-size: 12px;
+  }
+
+  .characterSpecialty {
+    font-size: 9px;
+  }
+
+  .timer {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+}

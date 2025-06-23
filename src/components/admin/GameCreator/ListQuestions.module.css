@@ -1,0 +1,33 @@
+.questionsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  justify-content: center;
+  margin: 0 20px;
+}
+
+.questionCard {
+  border: 1px solid #0c0c0c;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.questionCardSelected {
+  background-color: #f0f8ff;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+.questionCard h4 {
+  text-align: center;
+  margin: 0 0 5px;
+  font-size: 16px;
+  color: #31363F;
+}
+
+.questionCard p {
+  margin: 2px 0;
+  font-size: 14px;
+}

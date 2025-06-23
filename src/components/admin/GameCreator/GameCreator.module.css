@@ -1,0 +1,71 @@
+.gameCreatorContainer {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 255, 0.7));
+  border-radius: 20px;
+  padding: 40px;
+  width: 500px;
+  margin: 1.5rem auto 0;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.gameCreatorContainer h2 {
+  color: #343434;
+  font-size: 28px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.gameCreatorContainer p {
+  color: #7a7a7a;
+  font-size: 16px;
+  margin-bottom: 25px;
+}
+
+.gameCreatorContainer label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #4a4a4a;
+  text-align: left;
+}
+
+.gameCreatorContainer input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  color: #333;
+  font-size: 16px;
+  outline: none;
+  transition: box-shadow 0.3s;
+}
+
+.gameCreatorContainer input::placeholder {
+  color: #bbb;
+  opacity: 1;
+}
+
+.gameCreatorContainer input:focus {
+  box-shadow: 0 0 5px rgba(80, 59, 59, 0.8);
+  border: 1px solid #000000; 
+}
+
+
+.gameCreatorContainer button {
+  width: 100%;
+  padding: 12px;
+  background: #393139;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s;
+}
+
+.gameCreatorContainer button:hover {
+  background:#8b8b8b;
+  transform: scale(1.05);
+}

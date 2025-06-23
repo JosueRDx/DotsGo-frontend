@@ -1,0 +1,8 @@
+.notfound-container {
+  display: flex;
+  flex-flow: column;
+  max-width: 768px !important;
+  margin: 0 auto;
+  margin-top: 1rem;
+  gap: 1rem;
+}

@@ -1,0 +1,22 @@
+.inputContainer {
+  display: flex;
+  background-color: #ffffff;
+  border: solid 3px #202938;
+  border-radius: 16px;
+  padding: 12px 20px;
+  width: 100%;
+  gap: 12px;
+  align-items: center;
+}
+
+.customInput {
+  background-color: transparent;
+  border: none;
+  color: #202938;
+  font-family: inherit;
+  font-weight: 500;
+  outline: none;
+  width: 100%;
+  font-size: 1.2em;
+}
+

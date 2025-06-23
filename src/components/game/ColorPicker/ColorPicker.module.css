@@ -1,0 +1,27 @@
+.color-picker-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.color-picker-container h2 {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #1f2937;
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+/* Esta clase asegura que las cartillas se alineen horizontalmente */
+.color-options {
+  display: flex;
+  flex-wrap: wrap; /* permite saltar a la siguiente línea si no caben */
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  max-width: 1000px;
+  width: 100%;
+  padding: 10px;
+}

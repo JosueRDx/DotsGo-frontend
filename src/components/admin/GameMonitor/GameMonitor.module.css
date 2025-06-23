@@ -1,0 +1,110 @@
+.gameMonitorContainer {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 245, 255, 0.85));
+  border-radius: 15px;
+  padding: 35px;
+  width: 520px;
+  margin: 1.5rem auto 0;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  color: #333;
+}
+
+.gameMonitorContainer h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  background:#000000;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gameInfo p {
+  margin: 5px 0;
+  font-size: 16px;
+  color: #444;
+}
+
+.gameInfo p span {
+  font-weight: 600;
+  color: #000;
+}
+
+.gameCode {
+  background-color: #fff;
+  color: #333;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 20px 0;
+  font-weight: bold;
+  font-size: 22px;
+}
+
+.gameCode p {
+  margin: 0;
+  font-size: 14px;
+  color: #000000;
+}
+
+.buttonForm {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background:#393139;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.buttonForm:hover {
+  background:#8b8b8b;
+  transform: scale(1.05);
+}
+
+
+/* Contenedor de alumnos conectados */
+.connectedStudentsContainer {
+  width: 100%;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.connectedStudentsContainer h3 {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.studentsList {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  justify-content: center;
+  margin: 0 20px;
+  color: #000000;
+}
+
+.student {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  width: 100%;
+  max-width: 150px; 
+  background-color: #dddddd;
+  border-radius: 12px;
+  text-align: center;
+  overflow: hidden;
+  white-space: normal; 
+  word-wrap: break-word; 
+  text-wrap: balance; 
+
+  p {
+    text-align: center;
+    width: 100%;
+  }
+}
