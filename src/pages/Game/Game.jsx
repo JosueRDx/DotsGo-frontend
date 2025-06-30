@@ -571,7 +571,7 @@ export default function Game() {
                   <button
                     className={`${styles.submitButton} ${
                       canSubmit() ? styles.canSubmit : styles.cannotSubmit
-                    }`}
+                    } ${isSubmitting ? styles.waiting : ''}`}
                     onClick={submitAnswer}
                     disabled={!canSubmit()}
                   >
@@ -584,6 +584,12 @@ export default function Game() {
                       </>
                     )}
                   </button>
+                  {submissionStatus === 'waiting' && (
+                    <div className={styles.statusMessage}>
+                      <Clock size={18} />
+                      <span>Esperando a los demás jugadores...</span>
+                    </div>
+                  )}
                 </div>
               )}
 
