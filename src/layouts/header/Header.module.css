@@ -5,7 +5,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
+  padding: 15px 30px;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(139, 92, 246, 0.3);
@@ -15,42 +15,47 @@
   left: 0;
   right: 0;
   z-index: 10;
+  min-height: 70px;
 }
 
 .logoSection {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .headerLogo {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
+  width: 45px;
+  height: 45px;
+  border-radius: 10px;
   object-fit: contain;
 }
 
 .headerTitle {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: white;
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  white-space: nowrap;
 }
 
 .createGameBtn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
+  gap: 6px;
+  padding: 10px 20px;
   background: linear-gradient(135deg, #10b981, #34d399);
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   color: white;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-  font-size: 14px;
+  font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .createGameBtn:hover {
@@ -60,14 +65,16 @@
 
 /* Temporizador */
 .timer {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
   background-color: #4a5568;
   color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  margin-left: auto; /* Para alinearlo a la derecha */
+  padding: 8px 16px;
+  border-radius: 18px;
   transition: all 0.3s ease;
+  flex-shrink: 0;
+  min-width: 70px;
+  text-align: center;
 }
 
 .timer.lowTime {
@@ -86,14 +93,16 @@
 .characterDisplay {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: rgba(139, 92, 246, 0.2);
   backdrop-filter: blur(10px);
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 16px;
   border: 1px solid rgba(139, 92, 246, 0.4);
   transition: all 0.3s ease;
-  margin: 0 15px;
+  margin: 0 10px;
+  flex-shrink: 0;
+  max-width: 200px;
 }
 
 .characterDisplay:hover {
@@ -104,12 +113,13 @@
 }
 
 .characterAvatar {
-  width: 45px;
-  height: 45px;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   object-fit: contain;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
   transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
 .characterDisplay:hover .characterAvatar {
@@ -119,89 +129,79 @@
 .characterInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
 }
 
 .characterName {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: white;
   line-height: 1.2;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .characterSpecialty {
-  font-size: 11px;
+  font-size: 9px;
   color: #c084fc;
   font-weight: 500;
   opacity: 0.9;
   line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Responsive para mantener tu estilo */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .header {
-    padding: 15px 20px;
-    flex-wrap: wrap;
-    height: auto;
-    min-height: 80px;
+    padding: 12px 25px;
   }
-
-  .logoSection {
-    order: 1;
-    flex: 1;
-  }
-
+  
   .headerTitle {
-    font-size: 20px;
+    font-size: 18px;
   }
-
-  .headerLogo {
-    width: 40px;
-    height: 40px;
-  }
-
-  .createGameBtn {
-    order: 2;
-    padding: 10px 16px;
-    font-size: 13px;
-  }
-
+  
   .characterDisplay {
-    order: 3;
-    flex-basis: 100%;
-    justify-content: center;
-    margin: 10px 0 5px 0;
-    padding: 8px 16px;
+    max-width: 180px;
+    gap: 8px;
+    padding: 5px 10px;
   }
-
+  
   .characterAvatar {
     width: 35px;
     height: 35px;
   }
-
+  
   .characterName {
-    font-size: 13px;
+    font-size: 11px;
   }
-
+  
   .characterSpecialty {
-    font-size: 10px;
-  }
-
-  .timer {
-    order: 4;
-    margin: 5px auto 0 auto;
-    font-size: 1rem;
+    font-size: 8px;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .header {
-    padding: 12px 15px;
+    padding: 10px 20px;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 60px;
+    gap: 8px;
+  }
+
+  .logoSection {
+    order: 1;
+    gap: 10px;
   }
 
   .headerTitle {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .headerLogo {
@@ -210,13 +210,18 @@
   }
 
   .createGameBtn {
-    padding: 8px 12px;
+    order: 3;
+    padding: 8px 16px;
     font-size: 12px;
+    gap: 4px;
   }
 
   .characterDisplay {
-    padding: 6px 12px;
-    gap: 8px;
+    order: 2;
+    margin: 0 5px;
+    padding: 4px 8px;
+    gap: 6px;
+    max-width: 150px;
   }
 
   .characterAvatar {
@@ -225,15 +230,227 @@
   }
 
   .characterName {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   .characterSpecialty {
-    font-size: 9px;
+    font-size: 7px;
   }
 
   .timer {
+    order: 4;
+    font-size: 1rem;
+    padding: 6px 12px;
+    margin-top: 5px;
+    align-self: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 8px 15px;
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    min-height: auto;
+    gap: 6px;
+  }
+
+  .logoSection {
+    order: 1;
+    justify-content: center;
+  }
+
+  .headerTitle {
+    font-size: 15px;
+  }
+
+  .headerLogo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .characterDisplay {
+    order: 2;
+    margin: 0;
+    padding: 4px 8px;
+    gap: 6px;
+    max-width: 160px;
+  }
+
+  .characterAvatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .characterName {
+    font-size: 9px;
+  }
+
+  .characterSpecialty {
+    font-size: 7px;
+  }
+
+  .timer {
+    order: 3;
     font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
+    padding: 6px 12px;
+    margin: 2px 0;
+  }
+
+  .createGameBtn {
+    order: 4;
+    padding: 6px 12px;
+    font-size: 11px;
+    width: auto;
+    margin-top: 2px;
+  }
+}
+
+@media (max-width: 360px) {
+  .header {
+    padding: 6px 12px;
+    gap: 4px;
+  }
+
+  .headerTitle {
+    font-size: 14px;
+  }
+
+  .headerLogo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .characterDisplay {
+    padding: 3px 6px;
+    gap: 4px;
+    max-width: 140px;
+  }
+
+  .characterAvatar {
+    width: 25px;
+    height: 25px;
+  }
+
+  .characterName {
+    font-size: 8px;
+  }
+
+  .characterSpecialty {
+    font-size: 6px;
+  }
+
+  .timer {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+  }
+
+  .createGameBtn {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+}
+
+/* Para mejorar la experiencia táctil en móviles */
+@media (hover: none) and (pointer: coarse) {
+  .createGameBtn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .characterDisplay {
+    min-height: 44px;
+  }
+  
+  .createGameBtn:hover {
+    transform: none;
+  }
+  
+  .characterDisplay:hover {
+    transform: none;
+    background: rgba(139, 92, 246, 0.2);
+  }
+  
+  .createGameBtn:active {
+    transform: scale(0.95);
+  }
+  
+  .characterDisplay:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Orientación landscape específica para móviles */
+@media (max-width: 768px) and (orientation: landscape) {
+  .header {
+    padding: 6px 15px;
+    flex-direction: row;
+    height: 50px;
+    min-height: 50px;
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  .logoSection {
+    order: 1;
+    flex: 0 0 auto;
+  }
+
+  .headerTitle {
+    font-size: 14px;
+  }
+
+  .headerLogo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .characterDisplay {
+    order: 2;
+    flex: 1;
+    margin: 0 5px;
+    padding: 3px 6px;
+    max-width: 120px;
+  }
+
+  .characterAvatar {
+    width: 25px;
+    height: 25px;
+  }
+
+  .characterName {
+    font-size: 8px;
+  }
+
+  .characterSpecialty {
+    font-size: 6px;
+  }
+
+  .timer {
+    order: 3;
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    margin: 0;
+  }
+
+  .createGameBtn {
+    order: 4;
+    padding: 4px 8px;
+    font-size: 10px;
+    gap: 2px;
+  }
+}
+
+/* Evitar que el texto se seleccione accidentalmente */
+.header * {
+  user-select: none;
+}
+
+/* Mejorar la legibilidad en pantallas pequeñas */
+@media (max-width: 480px) {
+  .characterName,
+  .characterSpecialty {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 }
