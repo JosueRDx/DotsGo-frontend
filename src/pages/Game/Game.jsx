@@ -305,6 +305,18 @@ export default function Game() {
     setProgressPercentage(0);
   };
 
+  // Limpiar selección actual sin afectar el estado de envío
+  const clearSelections = () => {
+    if (hasSubmitted) return;
+    setTopColor(null);
+    setBottomColor(null);
+    setSymbol(null);
+    setSymbolPosition(null);
+    setNumber(null);
+    setNumberPosition(null);
+    setCurrentStep(1);
+  };
+
   // Auto-submit cuando se agota el tiempo
   const handleAutoSubmit = () => {
     if (hasSubmitted) return;
@@ -584,12 +596,20 @@ export default function Game() {
                       </>
                     )}
                   </button>
-                  {submissionStatus === 'waiting' && (
-                    <div className={styles.statusMessage}>
-                      <Clock size={18} />
-                      <span>Esperando a los demás jugadores...</span>
-                    </div>
-                  )}
+                  <button
+                    className={styles.clearButton}
+                    onClick={clearSelections}
+                    type="button"
+                  >
+                    Limpiar Selección
+                  </button>
+                </div>
+              )}
+
+              {submissionStatus === 'waiting' && (
+                <div className={styles.statusMessage}>
+                  <Clock size={18} />
+                  <span>Esperando a los demás jugadores...</span>
                 </div>
               )}
 
