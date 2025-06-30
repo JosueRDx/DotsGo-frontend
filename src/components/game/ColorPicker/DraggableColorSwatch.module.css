@@ -1,0 +1,177 @@
+/* DraggableColorSwatch.module.css - Versión Compacta */
+
+.colorSwatch {
+  width: 100%;
+  max-width: 80px;
+  height: 90px;
+  border-radius: 8px;
+  border: 1.5px solid #ddd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 4px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: grab;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  opacity: 1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  user-select: none;
+  background-size: 14px 14px;
+  background-repeat: repeat;
+  line-height: 1.1;
+  word-break: break-word;
+  overflow: hidden;
+}
+
+.colorSwatch:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.colorSwatch:active {
+  cursor: grabbing;
+}
+
+/* Estados específicos */
+.colorSwatch.dragging {
+  opacity: 0.5;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  transform: scale(0.95);
+}
+
+.colorSwatch.lightColor {
+  border-color: #000;
+}
+
+.colorSwatch.pattern {
+  background-size: 14px 14px !important;
+}
+
+/* Responsive Design */
+
+/* Desktop */
+@media (min-width: 1025px) {
+  .colorSwatch {
+    max-width: 100px;
+    height: 110px;
+    font-size: 0.8rem;
+    padding: 6px;
+    border-radius: 10px;
+    background-size: 16px 16px;
+  }
+}
+
+/* Tablets */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .colorSwatch {
+    max-width: 85px;
+    height: 100px;
+    font-size: 0.75rem;
+    padding: 5px;
+    background-size: 15px 15px;
+  }
+}
+
+/* Móviles en vertical */
+@media (max-width: 767px) and (orientation: portrait) {
+  .colorSwatch {
+    max-width: 70px;
+    height: 80px;
+    font-size: 0.65rem;
+    padding: 4px;
+    border-radius: 6px;
+    background-size: 12px 12px;
+  }
+  
+  .colorSwatch:hover {
+    transform: translateY(-1px) scale(1.01);
+  }
+}
+
+/* Móviles en horizontal */
+@media (max-width: 767px) and (orientation: landscape) {
+  .colorSwatch {
+    max-width: 60px;
+    height: 65px;
+    font-size: 0.6rem;
+    padding: 3px;
+    border-radius: 5px;
+    background-size: 10px 10px;
+  }
+  
+  .colorSwatch:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .colorSwatch {
+    max-width: 65px;
+    height: 75px;
+    font-size: 0.6rem;
+    padding: 3px;
+    border-width: 1px;
+    background-size: 11px 11px;
+  }
+  
+  .colorSwatch:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 360px) {
+  .colorSwatch {
+    max-width: 55px;
+    height: 65px;
+    font-size: 0.55rem;
+    padding: 2px;
+    border-radius: 4px;
+    background-size: 10px 10px;
+  }
+  
+  .colorSwatch:hover {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Para dispositivos táctiles */
+@media (hover: none) and (pointer: coarse) {
+  .colorSwatch {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .colorSwatch:hover {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .colorSwatch:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Animaciones suaves */
+@media (prefers-reduced-motion: no-preference) {
+  .colorSwatch {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Para usuarios que prefieren menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .colorSwatch {
+    transition: opacity 0.2s ease;
+  }
+  
+  .colorSwatch:hover {
+    transform: none;
+  }
+}

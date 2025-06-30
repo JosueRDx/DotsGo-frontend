@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDrag } from 'react-dnd';
 import { ItemTypes } from '../Designer/ItemTypes';
+import styles from './DraggableColorSwatch.module.css';
 
 const DraggableColorSwatch = ({ colorOption }) => {
   const [{ isDragging }, dragRef] = useDrag(() => ({
@@ -16,35 +17,28 @@ const DraggableColorSwatch = ({ colorOption }) => {
 
   const isPattern = colorOption.type === 'pattern';
 
-  const swatchStyle = {
-    width: '100px',
-    height: '140px',
-    borderRadius: '10px',
-    border: '2px solid #ddd',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    textAlign: 'center',
-    padding: '8px',
-    fontSize: '0.85rem',
-    fontWeight: 'bold',
-    color: isLightColor || isPattern ? '#111' : '#fff',
-    cursor: 'grab',
-    boxShadow: isDragging
-      ? '0 0 10px rgba(0, 0, 0, 0.3)'
-      : '0 4px 10px rgba(0, 0, 0, 0.15)',
-    opacity: isDragging ? 0.5 : 1,
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-    userSelect: 'none',
-    flex: '0 0 auto',
+  // Clases CSS dinámicas
+  const swatchClasses = [
+    styles.colorSwatch,
+    isDragging && styles.dragging,
+    isLightColor && styles.lightColor,
+    isPattern && styles.pattern
+  ].filter(Boolean).join(' ');
+
+  // Solo estilos dinámicos que no se pueden hacer con CSS
+  const dynamicStyles = {
     backgroundColor: isPattern ? '#fff' : colorOption.value,
     backgroundImage: isPattern ? colorOption.value : 'none',
-    backgroundSize: '20px 20px',
-    backgroundRepeat: 'repeat',
+    color: isLightColor || isPattern ? '#111' : '#fff',
   };
 
   return (
-    <div ref={dragRef} style={swatchStyle} title={colorOption.name}>
+    <div 
+      ref={dragRef} 
+      className={swatchClasses}
+      style={dynamicStyles}
+      title={colorOption.name}
+    >
       {colorOption.name}
     </div>
   );

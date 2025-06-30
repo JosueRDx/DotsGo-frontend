@@ -3,25 +3,115 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-bottom: 20px;
+  height: 100%;
+  overflow: hidden;
 }
 
 .color-picker-container h2 {
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 0.9rem;
   color: #1f2937;
-  margin: 0 0 10px;
+  margin: 0 0 0.5rem;
   text-align: center;
+  line-height: 1.2;
+  flex-shrink: 0;
 }
 
-/* Esta clase asegura que las cartillas se alineen horizontalmente */
+/* CORREGIDO: Grid compacto que se ajusta al espacio disponible */
 .color-options {
-  display: flex;
-  flex-wrap: wrap; /* permite saltar a la siguiente línea si no caben */
-  justify-content: center;
-  align-items: flex-start;
-  gap: 20px;
-  max-width: 1000px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 8px;
   width: 100%;
-  padding: 10px;
+  height: 100%;
+  padding: 0.5rem;
+  justify-items: center;
+  align-content: start;
+  overflow: hidden;
+}
+
+/* Responsive Design */
+
+/* Desktop */
+@media (min-width: 1025px) {
+  .color-picker-container h2 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .color-options {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 12px;
+    padding: 0.75rem;
+  }
+}
+
+/* Tablets */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .color-picker-container h2 {
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+  }
+  
+  .color-options {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 10px;
+    padding: 0.6rem;
+  }
+}
+
+/* Móviles en vertical */
+@media (max-width: 767px) and (orientation: portrait) {
+  .color-picker-container h2 {
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .color-options {
+    grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+    gap: 6px;
+    padding: 0.4rem;
+  }
+}
+
+/* Móviles en horizontal */
+@media (max-width: 767px) and (orientation: landscape) {
+  .color-picker-container h2 {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .color-options {
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    gap: 5px;
+    padding: 0.3rem;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .color-picker-container h2 {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .color-options {
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    gap: 5px;
+    padding: 0.3rem;
+  }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 360px) {
+  .color-picker-container h2 {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .color-options {
+    grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+    gap: 4px;
+    padding: 0.25rem;
+  }
 }
