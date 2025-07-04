@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Trophy, Medal, Award, Crown, Users, Target, Zap, Star, Home, RotateCcw } from "lucide-react";
+import { Trophy, Medal, Award, Crown, Users, Target, Zap, Star, Home, RotateCcw, XCircle } from "lucide-react";
 import styles from "./GameResults.module.css";
 import logo from "../../assets/images/logo.png";
 
@@ -129,6 +129,10 @@ export default function GameResults() {
                     <span>{sortedResults[0].correctAnswers}/{sortedResults[0].totalQuestions}</span>
                   </div>
                   <div className={styles.statItem}>
+                    <XCircle size={16} />
+                    <span>Incorrectas: {sortedResults[0].totalQuestions - sortedResults[0].correctAnswers}</span>
+                  </div>
+                  <div className={styles.statItem}>
                     <Zap size={16} />
                     <span>{Math.round((sortedResults[0].correctAnswers / sortedResults[0].totalQuestions) * 100)}%</span>
                   </div>
@@ -189,6 +193,10 @@ export default function GameResults() {
                       <div className={styles.statRow}>
                         <Target size={14} />
                         <span>Correctas: {player.correctAnswers}</span>
+                      </div>
+                      <div className={styles.statRow}>
+                        <XCircle size={14} />
+                        <span>Incorrectas: {player.totalQuestions - player.correctAnswers}</span>
                       </div>
                       <div className={styles.statRow}>
                         <Users size={14} />
