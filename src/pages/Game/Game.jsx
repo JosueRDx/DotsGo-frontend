@@ -605,7 +605,7 @@ export default function Game() {
 
               {submissionStatus === 'waiting' && (
                 <div className={styles.statusMessage}>
-                  <Clock size={18} />
+                  <Clock size={25} />
                   <span>Esperando a los demás jugadores...</span>
                 </div>
               )}

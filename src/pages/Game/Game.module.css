@@ -580,6 +580,28 @@
   margin: 0 auto;
 }
 
+/* Status message when waiting for players */
+.statusMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #374151;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.statusMessage svg {
+  color: #8b5cf6;
+  animation: spin 2s linear infinite;
+}
+
 /* RESPONSIVE DESIGN - CORREGIDO para móviles */
 
 /* Tablets horizontales */
@@ -968,6 +990,18 @@
     transform: rotate(360deg);
   }
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 /* Utilidades */
 .hidden {
