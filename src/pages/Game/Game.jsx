@@ -125,22 +125,19 @@ export default function Game() {
 
     if (timeLeft > 0 && !hasSubmitted) {
       intervalId = setInterval(() => {
-        setTimeLeft(prevTime => {
-          if (prevTime <= 1) {
-            clearInterval(intervalId);
-            // Auto-submit si el tiempo se agota
-            if (!hasSubmitted) {
-              handleAutoSubmit();
-            }
-            return 0;
-          }
-          return prevTime - 1;
-        });
+        setTimeLeft(prevTime => (prevTime > 0 ? prevTime - 1 : 0));
       }, 1000);
     }
 
     return () => clearInterval(intervalId);
   }, [timeLeft, hasSubmitted]);
+
+  // Auto-submit cuando el contador llega a cero
+  useEffect(() => {
+    if (timeLeft === 0 && !hasSubmitted && !isSubmitting) {
+      handleAutoSubmit();
+    }
+  }, [timeLeft, hasSubmitted, isSubmitting]);
 
   useEffect(() => {
     const pin = localStorage.getItem("gamePin");
