@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ListQuestions.module.css";
 
-// Importamos la URL base desde la variable de entorno
-const API_URL = import.meta.env.VITE_BACKEND_URL || '';
+import { API_URL } from "../../../utils/constants";
 
 export default function ListQuestions({ onSelectQuestions }) {
   const [questions, setQuestions] = useState([]);

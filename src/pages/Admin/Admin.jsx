@@ -23,8 +23,7 @@ import personaje3 from "../../assets/images/personajes/3.png";
 import personaje4 from "../../assets/images/personajes/4.png";
 import personaje5 from "../../assets/images/personajes/5.png";
 import personaje6 from "../../assets/images/personajes/6.png";
-
-const API_URL = import.meta.env.VITE_BACKEND_URL || '';
+import { API_URL } from "../../utils/constants";
 
 export default function Admin() {
   const [activeSection, setActiveSection] = useState('crear-juego');
