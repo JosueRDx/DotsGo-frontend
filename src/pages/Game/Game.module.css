@@ -10,7 +10,7 @@
 /* Game Wrapper - CORREGIDO: Padding-top específico para móviles */
 .gameWrapper {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   background: linear-gradient(270deg, #0f172a, #1e1b4b, #312e81, #1e1b4b, #0f172a);
   background-size: 400% 400%;
   animation: gameBackground 20s ease-in-out infinite;
@@ -21,10 +21,9 @@
   padding: 80px 0.5rem 0.5rem 0.5rem;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
-  position: fixed;
-  top: 0;
-  left: 0;
-  overflow: hidden;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .gameWrapper::before {
@@ -89,10 +88,10 @@
   background: rgba(255, 255, 255, 0.95);
   width: 100%;
   max-width: 1400px;
-  height: calc(100vh - 80px);
+  min-height: calc(100vh - 80px);
   border-radius: 12px;
   padding: 0.75rem;
-  box-shadow: 
+  box-shadow:
     0 25px 50px rgba(0, 0, 0, 0.2),
     0 0 100px rgba(139, 92, 246, 0.1);
   display: flex;
@@ -101,7 +100,8 @@
   border: 1px solid rgba(139, 92, 246, 0.2);
   position: relative;
   z-index: 2;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Question Header - Compacto */
@@ -611,7 +611,7 @@
   }
   
   .gameContainer {
-    height: calc(100vh - 75px);
+    min-height: calc(100vh - 75px);
   }
   
   .questionTitle {
@@ -636,7 +636,7 @@
   
   .gameContainer {
     /* CORREGIDO: Altura ajustada para móviles */
-    height: calc(100vh - 120px);
+    min-height: calc(100vh - 120px);
     padding: 0.5rem;
     border-radius: 8px;
   }
@@ -794,7 +794,7 @@
   }
   
   .gameContainer {
-    height: calc(100vh - 130px);
+    min-height: calc(100vh - 130px);
   }
   
   .questionTitle {
@@ -841,7 +841,7 @@
   }
   
   .gameContainer {
-    height: calc(100vh - 140px);
+    min-height: calc(100vh - 140px);
   }
   
   .questionTitle {
@@ -885,7 +885,7 @@
   }
   
   .gameContainer {
-    height: calc(100vh - 70px);
+    min-height: calc(100vh - 70px);
   }
   
   .questionHeader {
