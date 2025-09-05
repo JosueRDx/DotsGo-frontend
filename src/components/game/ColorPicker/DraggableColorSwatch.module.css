@@ -18,6 +18,7 @@
   opacity: 1;
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   user-select: none;
+  touch-action: none;
   background-size: 14px 14px;
   background-repeat: repeat;
   line-height: 1.1;

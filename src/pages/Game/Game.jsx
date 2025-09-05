@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { CheckCircle, Clock, Zap, Send, AlertCircle, Target, Trophy } from "lucide-react";
 
 import { socket } from "../../services/websocket/socketService";
@@ -21,6 +22,9 @@ import Header from "../../layouts/header/Header";
 
 export default function Game() {
   const navigate = useNavigate();
+  
+  const isTouchDevice = typeof window !== 'undefined' &&
+    ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
   const [question, setQuestion] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
@@ -412,7 +416,10 @@ export default function Game() {
   }
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider
+      backend={isTouchDevice ? TouchBackend : HTML5Backend}
+      options={isTouchDevice ? { enableMouseEvents: true } : undefined}
+    >      
       <Header 
         timeLeft={timeLeft} 
         showCreateButton={false}
