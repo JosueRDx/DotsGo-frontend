@@ -44,6 +44,8 @@ export default function Game() {
   const [symbolPosition, setSymbolPosition] = useState(null);
   const [number, setNumber] = useState(null);
   const [numberPosition, setNumberPosition] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+
 
   // Estados para feedback visual
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,6 +106,41 @@ export default function Game() {
     setNumber(num === 'Sin Número' ? null : num);
     setNumberPosition(position);
     setCurrentStep((prev) => (prev === 3 ? 4 : prev));
+  };
+
+    const handleSelectColor = (color) => {
+    if (hasSubmitted) return;
+    setSelectedItem({ type: 'color', option: color });
+  };
+
+  const handleSelectSymbol = (sym) => {
+    if (hasSubmitted) return;
+    setSelectedItem({ type: 'symbol', option: sym });
+  };
+
+  const handleSelectNumber = (num) => {
+    if (hasSubmitted) return;
+    setSelectedItem({ type: 'number', value: num });
+  };
+
+  const handleZoneTap = (zone) => {
+    if (hasSubmitted || !selectedItem) return;
+    switch (selectedItem.type) {
+      case 'color':
+        zone === 'top'
+          ? handleTopColorDrop(selectedItem.option)
+          : handleBottomColorDrop(selectedItem.option);
+        break;
+      case 'symbol':
+        handleSymbolDrop(selectedItem.option, zone);
+        break;
+      case 'number':
+        handleNumberDrop(selectedItem.value, zone);
+        break;
+      default:
+        break;
+    }
+    setSelectedItem(null);
   };
 
   // Calcular progreso de completado
@@ -513,6 +550,8 @@ export default function Game() {
                   onBottomColorDrop={handleBottomColorDrop}
                   onSymbolDrop={handleSymbolDrop}
                   onNumberDrop={handleNumberDrop}
+                  isTouchDevice={isTouchDevice}
+                  onZoneTap={handleZoneTap}
                 />
               </div>
             </section>
@@ -521,30 +560,48 @@ export default function Game() {
             <section className={styles.controlsSection}>
               {currentStep === 1 && question && (
                 <div className={styles.controlCard}>
-                  <ColorPicker 
-                    colors={availableColorOptions} 
-                    title="Paso 1: Arrastra Colores (Superior / Inferior)" 
+                  <ColorPicker
+                    colors={availableColorOptions}
+                    title={
+                      isTouchDevice
+                        ? "Paso 1: Selecciona un Color y toca la zona (Superior / Inferior)"
+                        : "Paso 1: Arrastra Colores (Superior / Inferior)"
+                    }
                     disabled={hasSubmitted}
+                    isTouchDevice={isTouchDevice}
+                    onSelectColor={handleSelectColor}
                   />
                 </div>
               )}
 
               {currentStep === 2 && question && (
                 <div className={styles.controlCard}>
-                  <LogoPicker 
-                    symbols={availableSymbols} 
-                    title="Paso 2: Arrastra un Símbolo (Arriba / Abajo)" 
+                  <LogoPicker
+                    symbols={availableSymbols}
+                    title={
+                      isTouchDevice
+                        ? "Paso 2: Selecciona un Símbolo y toca la zona (Arriba / Abajo)"
+                        : "Paso 2: Arrastra un Símbolo (Arriba / Abajo)"
+                    }
                     disabled={hasSubmitted}
+                    isTouchDevice={isTouchDevice}
+                    onSelectSymbol={handleSelectSymbol}
                   />
                 </div>
               )}
 
               {currentStep === 3 && question && (
                 <div className={styles.controlCard}>
-                  <NumberPicker 
-                    numbers={availableNumbers} 
-                    title="Paso 3: Arrastra un Número (Superior / Inferior)" 
+                  <NumberPicker
+                    numbers={availableNumbers}
+                    title={
+                      isTouchDevice
+                        ? "Paso 3: Selecciona un Número y toca la zona (Superior / Inferior)"
+                        : "Paso 3: Arrastra un Número (Superior / Inferior)"
+                    }
                     disabled={hasSubmitted}
+                    isTouchDevice={isTouchDevice}
+                    onSelectNumber={handleSelectNumber}
                   />
                 </div>
               )}
