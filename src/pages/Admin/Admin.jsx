@@ -41,6 +41,9 @@ export default function Admin() {
   const [players, setPlayers] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [esperandoResultados, setEsperandoResultados] = useState(false);
+
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
   
   const navigate = useNavigate();
 
@@ -81,15 +84,36 @@ export default function Admin() {
       setPlayers(players);
     });
 
+    socket.on("game-started", (data) => {
+      setCurrentQuestion(data.currentIndex);
+      setTotalQuestions(data.totalQuestions);
+    });
+
     socket.on("game-ended", ({ results }) => {
       console.log("Resultados finales recibidos en Admin:", results);
       setEsperandoResultados(false);
       navigate("/game-results", { state: { results } });
     });
 
+    socket.on("game-state-update", (data) => {
+      console.log("Actualización de estado recibida:", data);
+      if (data.players) {
+        setPlayerRankings(data.players);
+      }
+      if (data.currentQuestion) {
+        setCurrentQuestion(data.currentQuestion);
+      }
+      if (data.totalQuestions) {
+        setTotalQuestions(data.totalQuestions);
+      }
+    });
+
+
     return () => {
       socket.off("player-joined");
+      socket.off("game-started");
       socket.off("game-ended");
+      socket.off("game-state-update"); 
       disconnectSocket();
     };
   }, [navigate]);
@@ -153,6 +177,8 @@ export default function Admin() {
         : [...prevSelected, questionId]
     );
   };
+  //Funcion para el raking en tiempo real
+  const [playerRankings, setPlayerRankings] = useState([]);
 
   const selectAllQuestions = () => {
     const allQuestionIds = questions.map(q => q._id);
@@ -402,6 +428,45 @@ export default function Admin() {
                     <div className={styles.waitingResults}>
                       <div className={styles.spinner}></div>
                       <p>Esperando resultados del juego...</p>
+                      
+                      {/* COmponente de Ranking */}
+                      {/* Reemplaza el componente de ranking actual con este */}
+                      <div className={styles.liveRanking}>
+                        <h4>🏆 Ranking en Tiempo Real</h4>
+                        <div className={styles.rankingList}>
+                          {playerRankings && playerRankings.length > 0 ? (
+                            playerRankings
+                              .sort((a, b) => b.score - a.score)
+                              .map((player, index) => (
+                                <div key={player.id || index} className={styles.rankingItem}>
+                                  <span className={styles.rankPosition}>#{index + 1}</span>
+                                  <span className={styles.rankPlayerName}>
+                                    {player.username || 'Jugador'}
+                                  </span>
+                                  <span className={styles.rankScore}>
+                                    {player.score || 0} pts
+                                  </span>
+                                  <div className={styles.rankProgress}>
+                                    <div 
+                                      className={styles.progressBar} 
+                                      style={{
+                                        width: `${playerRankings[0].score > 0 ? 
+                                          (player.score / playerRankings[0].score) * 100 : 0}%`
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              ))
+                          ) : (
+                            <div className={styles.noRankings}>
+                              <p>Esperando puntuaciones...</p>
+                              <p className={styles.questionInfo}>
+                                Pregunta actual: {currentQuestion} de {totalQuestions}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
