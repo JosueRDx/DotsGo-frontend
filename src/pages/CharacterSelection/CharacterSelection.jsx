@@ -13,6 +13,13 @@ import personaje4 from "../../assets/images/personajes/4.png";
 import personaje5 from "../../assets/images/personajes/5.png";
 import personaje6 from "../../assets/images/personajes/6.png";
 
+// NUEVO: imágenes de personajes 7–11
+import personaje7 from "../../assets/images/personajes/7.png";
+import personaje8 from "../../assets/images/personajes/8.png";
+import personaje9 from "../../assets/images/personajes/9.png";
+import personaje10 from "../../assets/images/personajes/10.png";
+import personaje11 from "../../assets/images/personajes/11.png";
+
 export default function CharacterSelection() {
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -74,8 +81,58 @@ export default function CharacterSelection() {
       description: 'Experto en transporte y almacenamiento de sustancias peligrosas.',
       color: '#f59e0b',
       stats: { speed: 88, precision: 88, knowledge: 88 }
+        },
+        // ====== NUEVOS PERSONAJES ======
+    { 
+      id: 7, 
+      name: 'BioShield', 
+      image: personaje7,
+      specialty: 'Bioseguridad',
+      description: 'Controla agentes biológicos y domina cabinas de bioseguridad.',
+      color: '#14b8a6',
+      stats: { speed: 82, precision: 92, knowledge: 93 }
+    },
+    { 
+      id: 8, 
+      name: 'CryoTech', 
+      image: personaje8,
+      specialty: 'Bajas Temperaturas',
+      description: 'Especialista en nitrógeno líquido, criogenia y EPP térmico.',
+      color: '#06b6d4',
+      stats: { speed: 78, precision: 89, knowledge: 91 }
+    },
+    { 
+      id: 9, 
+      name: 'Radiant Core', 
+      image: personaje9,
+      specialty: 'Radioprotección',
+      description: 'Gestiona fuentes ionizantes y protocolos ALARA.',
+      color: '#f97316',
+      stats: { speed: 84, precision: 94, knowledge: 90 }
+    },
+    { 
+      id: 10, 
+      name: 'Waste Wizard', 
+      image: personaje10,
+      specialty: 'Gestión de Residuos',
+      description: 'Clasifica, neutraliza y dispone residuos peligrosos sin errores.',
+      color: '#22c55e',
+      stats: { speed: 76, precision: 96, knowledge: 92 }
+    },
+    { 
+      id: 11, 
+      name: 'Protocol Prime', 
+      image: personaje11,
+      specialty: 'Normativa & Auditoría',
+      description: 'Memoriza normas, auditorías y checklists como nadie.',
+      color: '#a855f7',
+      stats: { speed: 86, precision: 93, knowledge: 97 }
     }
+
+
   ];
+  
+  
 
   const handleCharacterSelect = (character) => {
     setSelectedCharacter(character);
