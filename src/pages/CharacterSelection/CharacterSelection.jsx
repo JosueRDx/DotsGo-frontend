@@ -12,7 +12,6 @@ import personaje3 from "../../assets/images/personajes/3.png";
 import personaje4 from "../../assets/images/personajes/4.png";
 import personaje5 from "../../assets/images/personajes/5.png";
 import personaje6 from "../../assets/images/personajes/6.png";
-
 // NUEVO: imágenes de personajes 7–11
 import personaje7 from "../../assets/images/personajes/7.png";
 import personaje8 from "../../assets/images/personajes/8.png";
@@ -128,7 +127,6 @@ export default function CharacterSelection() {
       color: '#a855f7',
       stats: { speed: 86, precision: 93, knowledge: 97 }
     }
-
 
   ];
   
