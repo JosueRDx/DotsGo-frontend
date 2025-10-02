@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, Crown, Play, Clock, Wifi, WifiOff, Zap } from "lucide-react";
 import styles from "./WaitingRoom.module.css";
@@ -13,6 +13,7 @@ export default function WaitingRoom() {
   const [countdown, setCountdown] = useState(null);
   const [isGameStarting, setIsGameStarting] = useState(false);
   const [transitionPhase, setTransitionPhase] = useState('waiting'); // 'waiting', 'countdown', 'starting', 'transitioning'
+  const autoNavigateRef = useRef(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,6 +46,14 @@ export default function WaitingRoom() {
     }
 
     // Socket events
+    const navigateToGameInProgress = () => {
+      if (!autoNavigateRef.current) {
+        autoNavigateRef.current = true;
+        localStorage.setItem("joiningInProgress", "true");
+        navigate("/game");
+      }
+    };
+
     socket.on("players-updated", (data) => {
       console.log("Jugadores actualizados:", data);
       if (data && data.players) {
@@ -85,6 +94,9 @@ export default function WaitingRoom() {
       if (data && data.gameInfo) {
         setGameInfo(data.gameInfo);
         localStorage.setItem("questionsCount", data.gameInfo.questionsCount);
+        if (data.gameInfo.status === "playing") {
+          navigateToGameInProgress();
+        }
       }
     });
 
@@ -113,6 +125,9 @@ export default function WaitingRoom() {
         if (response.gameInfo) {
           setGameInfo(response.gameInfo);
           localStorage.setItem("questionsCount", response.gameInfo.questionsCount);
+          if (response.gameInfo.status === "playing") {
+            navigateToGameInProgress();
+          }
         }
       } else {
         console.log("No se pudieron obtener los jugadores:", response);
