@@ -33,6 +33,9 @@ export default function Game() {
   const [socketId, setSocketId] = useState(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
+
+  const questionRef = useRef(null);
+  const joiningInProgressRef = useRef(false);
   
   // Estado para saber si el juego ha iniciado alguna vez
   const [gameHasStarted, setGameHasStarted] = useState(false);
@@ -59,6 +62,10 @@ export default function Game() {
   useEffect(() => {
     hasSubmittedRef.current = hasSubmitted;
   }, [hasSubmitted]);
+
+  useEffect(() => {
+    questionRef.current = question;
+  }, [question]);
 
   // Filtrar colores disponibles - incluir solid y pattern
   const availableColorOptions = availableColors.filter(
@@ -188,6 +195,12 @@ export default function Game() {
       setTotalQuestions(parseInt(storedCount, 10));
     }
 
+    const joiningFlag = localStorage.getItem("joiningInProgress");
+    if (joiningFlag === "true") {
+      joiningInProgressRef.current = true;
+      localStorage.removeItem("joiningInProgress");
+    }
+
     // Guardar ID del socket para identificar respuestas propias
     if (socket.connected) {
       setSocketId(socket.id);
@@ -261,7 +274,9 @@ export default function Game() {
     // Escuchar nueva pregunta (para cuando cambie)
     socket.on("game-started", ({ question, timeLimit, currentIndex, totalQuestions: totalQ }) => {
       console.log("🎯 Nueva pregunta recibida via game-started:", question.title);
-      if (!hasSubmittedRef.current) {
+      if (joiningInProgressRef.current) {
+        joiningInProgressRef.current = false;
+      } else if (questionRef.current && !hasSubmittedRef.current) {
         handleAutoSubmit();
       }
       resetGameState();
@@ -276,7 +291,9 @@ export default function Game() {
     // Escuchar siguiente pregunta
     socket.on("next-question", ({ question, timeLimit, currentIndex, totalQuestions: totalQ }) => {
       console.log("🎯 Siguiente pregunta recibida:", question.title);
-      if (!hasSubmittedRef.current) {
+      if (joiningInProgressRef.current) {
+        joiningInProgressRef.current = false;
+      } else if (questionRef.current && !hasSubmittedRef.current) {
         handleAutoSubmit();
       }
       resetGameState();
@@ -346,6 +363,11 @@ export default function Game() {
   // Limpiar selección actual sin afectar el estado de envío
   const clearSelections = () => {
     if (hasSubmitted) return;
+    
+    if (!question) {
+      return;
+    }
+    
     setTopColor(null);
     setBottomColor(null);
     setSymbol(null);
@@ -359,6 +381,11 @@ export default function Game() {
   const handleAutoSubmit = () => {
     if (hasSubmitted) return;
     
+    
+    if (!question) {
+      return;
+    }
+
     setIsSubmitting(true);
     setHasSubmitted(true);
     setSubmissionStatus('waiting');

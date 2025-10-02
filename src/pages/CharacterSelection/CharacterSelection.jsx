@@ -172,16 +172,26 @@ export default function CharacterSelection() {
     }, (response) => {
       setLoading(false);
       if (response.success) {
-        // NUEVO: Guardar datos para la sala de espera
+        // NUEVO: Guardar datos persistentes del jugador
         localStorage.setItem("username", username);
         localStorage.setItem("selectedCharacter", JSON.stringify(selectedCharacter));
+
+        if (typeof response.totalQuestions === "number") {
+          localStorage.setItem("questionsCount", response.totalQuestions);
+        }
         
         // Limpiar datos temporales
         localStorage.removeItem("tempUsername");
-        console.log("Conectado al juego con personaje seleccionado");
-        
-        // CAMBIO: Ir a sala de espera en lugar de directo al juego
-        navigate("/waiting-room");
+        const joiningInProgress = response.gameStatus === "playing";
+        if (joiningInProgress) {
+          localStorage.setItem("joiningInProgress", "true");
+          console.log("Conectado a una partida en curso");
+          navigate("/game");
+        } else {
+          localStorage.removeItem("joiningInProgress");
+          console.log("Conectado al juego con personaje seleccionado");
+          navigate("/waiting-room");
+        }
       } else {
         setError(response.error || "Error al unirse al juego");
       }
