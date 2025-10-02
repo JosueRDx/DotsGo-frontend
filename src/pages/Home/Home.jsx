@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Gamepad2, Users, Zap, Trophy, Play, ArrowRight } from "lucide-react";
 import styles from "./Home.module.css";
 import logo from "../../assets/images/logo.png";
+import { socket, connectSocket } from "../../services/websocket/socketService";
 
 export default function Home() {
   const [pin, setPin] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+    const [pinError, setPinError] = useState("");
   const navigate = useNavigate();
 
   const handlePinChange = (value) => {
@@ -14,6 +16,9 @@ export default function Home() {
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, "")
       .slice(0, 6);
+    if (pinError) {
+      setPinError("");
+    }
     setPin(sanitizedValue);
   };
 
@@ -23,13 +28,49 @@ export default function Home() {
       return;
     }
     setIsLoading(true);
-    localStorage.setItem("gamePin", pin);
-    
-    // Simular carga y navegar
-    setTimeout(() => {
+    setPinError("");
+
+    const emitValidation = () => {
+      socket.emit("get-room-players", { pin }, (response) => {
+        setIsLoading(false);
+
+        if (response?.success) {
+          localStorage.setItem("gamePin", pin);
+          navigate("/join");
+          return;
+        }
+
+        setPinError(response?.error || "PIN inválido. Verifica e intenta nuevamente.");
+      });
+    };
+
+    const handleConnectionError = (error) => {
       setIsLoading(false);
-      navigate("/join");
-    }, 1000);
+      setPinError("No se pudo verificar el PIN. Intenta de nuevo más tarde.");
+      console.error("Error al conectar el socket:", error);
+    };
+
+    if (socket.connected) {
+      emitValidation();
+      return;
+    }
+
+    const onConnect = () => {
+      socket.off("connect", onConnect);
+      socket.off("connect_error", onError);
+      emitValidation();
+    };
+
+    const onError = (err) => {
+      socket.off("connect", onConnect);
+      socket.off("connect_error", onError);
+      handleConnectionError(err);
+    };
+
+    socket.once("connect", onConnect);
+    socket.once("connect_error", onError);
+
+    connectSocket();
   };
 
   const handleCreateGame = () => {
@@ -106,11 +147,12 @@ export default function Home() {
                 placeholder="Ingresa el PIN"
                 value={pin}
                 onChange={(e) => handlePinChange(e.target.value)}
-                className={styles.pinInput}
+                className={`${styles.pinInput} ${pinError ? styles.pinInputError : ""}`}
                 maxLength="6"
                 onKeyDown={(e) => e.key === "Enter" && handleSubmitPin()}
               />
-              <button 
+              {pinError && <p className={styles.pinErrorMessage}>{pinError}</p>}
+              <button
                 onClick={handleSubmitPin}
                 disabled={isLoading || pin.length !== 6}
                 className={`${styles.joinBtn} ${isLoading ? styles.loading : ''}`}
