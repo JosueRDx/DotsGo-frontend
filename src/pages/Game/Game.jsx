@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { CheckCircle, Clock, Zap, Send, AlertCircle, Target, Trophy } from "lucide-react";
 
 import { socket } from "../../services/websocket/socketService";
@@ -21,6 +22,9 @@ import Header from "../../layouts/header/Header";
 
 export default function Game() {
   const navigate = useNavigate();
+  
+  const isTouchDevice = typeof window !== 'undefined' &&
+    ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
   const [question, setQuestion] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
@@ -29,6 +33,9 @@ export default function Game() {
   const [socketId, setSocketId] = useState(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
+
+  const questionRef = useRef(null);
+  const joiningInProgressRef = useRef(false);
   
   // Estado para saber si el juego ha iniciado alguna vez
   const [gameHasStarted, setGameHasStarted] = useState(false);
@@ -40,6 +47,8 @@ export default function Game() {
   const [symbolPosition, setSymbolPosition] = useState(null);
   const [number, setNumber] = useState(null);
   const [numberPosition, setNumberPosition] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+
 
   // Estados para feedback visual
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +62,10 @@ export default function Game() {
   useEffect(() => {
     hasSubmittedRef.current = hasSubmitted;
   }, [hasSubmitted]);
+
+  useEffect(() => {
+    questionRef.current = question;
+  }, [question]);
 
   // Filtrar colores disponibles - incluir solid y pattern
   const availableColorOptions = availableColors.filter(
@@ -102,6 +115,41 @@ export default function Game() {
     setCurrentStep((prev) => (prev === 3 ? 4 : prev));
   };
 
+    const handleSelectColor = (color) => {
+    if (hasSubmitted) return;
+    setSelectedItem({ type: 'color', option: color });
+  };
+
+  const handleSelectSymbol = (sym) => {
+    if (hasSubmitted) return;
+    setSelectedItem({ type: 'symbol', option: sym });
+  };
+
+  const handleSelectNumber = (num) => {
+    if (hasSubmitted) return;
+    setSelectedItem({ type: 'number', value: num });
+  };
+
+  const handleZoneTap = (zone) => {
+    if (hasSubmitted || !selectedItem) return;
+    switch (selectedItem.type) {
+      case 'color':
+        zone === 'top'
+          ? handleTopColorDrop(selectedItem.option)
+          : handleBottomColorDrop(selectedItem.option);
+        break;
+      case 'symbol':
+        handleSymbolDrop(selectedItem.option, zone);
+        break;
+      case 'number':
+        handleNumberDrop(selectedItem.value, zone);
+        break;
+      default:
+        break;
+    }
+    setSelectedItem(null);
+  };
+
   // Calcular progreso de completado
   useEffect(() => {
     let progress = 0;
@@ -145,6 +193,12 @@ export default function Game() {
     const storedCount = localStorage.getItem("questionsCount");
     if (storedCount) {
       setTotalQuestions(parseInt(storedCount, 10));
+    }
+
+    const joiningFlag = localStorage.getItem("joiningInProgress");
+    if (joiningFlag === "true") {
+      joiningInProgressRef.current = true;
+      localStorage.removeItem("joiningInProgress");
     }
 
     // Guardar ID del socket para identificar respuestas propias
@@ -220,7 +274,9 @@ export default function Game() {
     // Escuchar nueva pregunta (para cuando cambie)
     socket.on("game-started", ({ question, timeLimit, currentIndex, totalQuestions: totalQ }) => {
       console.log("🎯 Nueva pregunta recibida via game-started:", question.title);
-      if (!hasSubmittedRef.current) {
+      if (joiningInProgressRef.current) {
+        joiningInProgressRef.current = false;
+      } else if (questionRef.current && !hasSubmittedRef.current) {
         handleAutoSubmit();
       }
       resetGameState();
@@ -235,7 +291,9 @@ export default function Game() {
     // Escuchar siguiente pregunta
     socket.on("next-question", ({ question, timeLimit, currentIndex, totalQuestions: totalQ }) => {
       console.log("🎯 Siguiente pregunta recibida:", question.title);
-      if (!hasSubmittedRef.current) {
+      if (joiningInProgressRef.current) {
+        joiningInProgressRef.current = false;
+      } else if (questionRef.current && !hasSubmittedRef.current) {
         handleAutoSubmit();
       }
       resetGameState();
@@ -305,6 +363,11 @@ export default function Game() {
   // Limpiar selección actual sin afectar el estado de envío
   const clearSelections = () => {
     if (hasSubmitted) return;
+    
+    if (!question) {
+      return;
+    }
+
     setTopColor(null);
     setBottomColor(null);
     setSymbol(null);
@@ -318,6 +381,11 @@ export default function Game() {
   const handleAutoSubmit = () => {
     if (hasSubmitted) return;
     
+    
+    if (!question) {
+      return;
+    }
+
     setIsSubmitting(true);
     setHasSubmitted(true);
     setSubmissionStatus('waiting');
@@ -334,15 +402,20 @@ export default function Game() {
 
     const pin = localStorage.getItem("gamePin");
     const username = localStorage.getItem("username");
-    const responseTime = questionTimeLimit !== null ? questionTimeLimit - timeLeft : 0;
+    const parsedLimit = Number(questionTimeLimit);
+    const parsedTimeLeft = Number(timeLeft);
+    const autoResponseTime = Number.isFinite(parsedLimit)
+      ? parsedLimit
+      : (Number.isFinite(parsedTimeLeft) ? parsedTimeLeft : 0);
 
     console.log("Respuesta auto-enviada (tiempo agotado):", answer);
 
     socket.emit("submit-answer", {
       pin: pin,
       answer: answer,
-      responseTime: responseTime,
-      questionId: question?._id
+      responseTime: autoResponseTime,
+      questionId: question?._id,
+      isAutoSubmit: true
     }, (response) => {
       if (response.success) {
         console.log("Respuesta (auto) recibida por el servidor:", response);
@@ -381,7 +454,8 @@ export default function Game() {
       pin: pin,
       answer: answer,
       responseTime: responseTime,
-      questionId: question?._id
+      questionId: question?._id,
+      isAutoSubmit: false
     }, (response) => {
       if (response.success) {
         console.log("Respuesta recibida por el servidor:", response);
@@ -412,7 +486,10 @@ export default function Game() {
   }
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider
+      backend={isTouchDevice ? TouchBackend : HTML5Backend}
+      options={isTouchDevice ? { enableMouseEvents: true } : undefined}
+    >      
       <Header 
         timeLeft={timeLeft} 
         showCreateButton={false}
@@ -506,6 +583,8 @@ export default function Game() {
                   onBottomColorDrop={handleBottomColorDrop}
                   onSymbolDrop={handleSymbolDrop}
                   onNumberDrop={handleNumberDrop}
+                  isTouchDevice={isTouchDevice}
+                  onZoneTap={handleZoneTap}
                 />
               </div>
             </section>
@@ -514,30 +593,48 @@ export default function Game() {
             <section className={styles.controlsSection}>
               {currentStep === 1 && question && (
                 <div className={styles.controlCard}>
-                  <ColorPicker 
-                    colors={availableColorOptions} 
-                    title="Paso 1: Arrastra Colores (Superior / Inferior)" 
+                  <ColorPicker
+                    colors={availableColorOptions}
+                    title={
+                      isTouchDevice
+                        ? "Paso 1: Selecciona un Color y toca la zona (Superior / Inferior)"
+                        : "Paso 1: Arrastra Colores (Superior / Inferior)"
+                    }
                     disabled={hasSubmitted}
+                    isTouchDevice={isTouchDevice}
+                    onSelectColor={handleSelectColor}
                   />
                 </div>
               )}
 
               {currentStep === 2 && question && (
                 <div className={styles.controlCard}>
-                  <LogoPicker 
-                    symbols={availableSymbols} 
-                    title="Paso 2: Arrastra un Símbolo (Arriba / Abajo)" 
+                  <LogoPicker
+                    symbols={availableSymbols}
+                    title={
+                      isTouchDevice
+                        ? "Paso 2: Selecciona un Símbolo y toca la zona (Arriba / Abajo)"
+                        : "Paso 2: Arrastra un Símbolo (Arriba / Abajo)"
+                    }
                     disabled={hasSubmitted}
+                    isTouchDevice={isTouchDevice}
+                    onSelectSymbol={handleSelectSymbol}
                   />
                 </div>
               )}
 
               {currentStep === 3 && question && (
                 <div className={styles.controlCard}>
-                  <NumberPicker 
-                    numbers={availableNumbers} 
-                    title="Paso 3: Arrastra un Número (Superior / Inferior)" 
+                  <NumberPicker
+                    numbers={availableNumbers}
+                    title={
+                      isTouchDevice
+                        ? "Paso 3: Selecciona un Número y toca la zona (Superior / Inferior)"
+                        : "Paso 3: Arrastra un Número (Superior / Inferior)"
+                    }
                     disabled={hasSubmitted}
+                    isTouchDevice={isTouchDevice}
+                    onSelectNumber={handleSelectNumber}
                   />
                 </div>
               )}

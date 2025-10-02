@@ -230,6 +230,16 @@
   gap: 15px;
 }
 
+.noResults {
+  text-align: center;
+  padding: 30px 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+}
+
 .resultCard {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);

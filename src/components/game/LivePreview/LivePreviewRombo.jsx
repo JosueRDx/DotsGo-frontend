@@ -15,6 +15,8 @@ const LivePreviewRombo = ({
   onBottomColorDrop,
   onSymbolDrop,
   onNumberDrop,
+  isTouchDevice = false,
+  onZoneTap,
 }) => {
   const [{ isOverTop, canDropTop, draggedItemTypeTop }, dropTopRef] = useDrop(() => ({
     accept: [ItemTypes.COLOR_SWATCH, ItemTypes.SYMBOL_ICON, ItemTypes.NUMBER_BADGE],
@@ -184,10 +186,14 @@ const LivePreviewRombo = ({
       <div className="rombo-outer">
         <div className={styles['rombo-inner']} style={romboInnerStyles}>
           <div className="rombo-border-inner" />
-          <div ref={dropTopRef} style={topDropZoneStyles}>
+          <div
+            ref={dropTopRef}
+            style={topDropZoneStyles}
+            onClick={isTouchDevice ? () => onZoneTap && onZoneTap('top') : undefined}
+          >
             {isEmpty && !isOverTop && !isOverBottom && (
               <span className="rombo-drop-hint">
-                Arrastra
+                {isTouchDevice ? 'Toca' : 'Arrastra'}
                 <br />
                 colores
                 <br />
@@ -195,8 +201,12 @@ const LivePreviewRombo = ({
               </span>
             )}
           </div>
-          <div ref={dropBottomRef} style={bottomDropZoneStyles}></div>
-
+          <div
+            ref={dropBottomRef}
+            style={bottomDropZoneStyles}
+            onClick={isTouchDevice ? () => onZoneTap && onZoneTap('bottom') : undefined}
+          ></div>
+          
           {symbolOption?.path && (
             <img
               src={symbolOption.path}

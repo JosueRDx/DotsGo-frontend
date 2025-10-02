@@ -4,24 +4,28 @@ import { useDrag } from 'react-dnd';
 import { ItemTypes } from '../Designer/ItemTypes';
 import styles from './LogoPicker.module.css';
 
-const DraggableLogoSwatch = ({ symbolOption }) => {
-  const [{ isDragging }, dragRef] = useDrag(() => ({
-    type: ItemTypes.SYMBOL_ICON,
-    item: { symbolOption },
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
+const DraggableLogoSwatch = ({ symbolOption, isTouchDevice = false, onSelect }) => {
+  const [{ isDragging }, dragRef] = useDrag(
+    () => ({
+      type: ItemTypes.SYMBOL_ICON,
+      item: { symbolOption },
+      canDrag: !isTouchDevice,
+      collect: (monitor) => ({
+        isDragging: !!monitor.isDragging(),
+      }),
     }),
-  }));
+      [symbolOption, isTouchDevice]
+  );
 
   if (!symbolOption.path) return null;
 
   return (
     <div
-      ref={dragRef}
+      ref={isTouchDevice ? null : dragRef}
       className={styles.logoButton}
       title={symbolOption.name}
-      style={{ opacity: isDragging ? 0.4 : 1, cursor: 'grab' }}
-    >
+      style={{ opacity: isDragging ? 0.4 : 1, cursor: isTouchDevice ? 'pointer' : 'grab' }}
+      onClick={isTouchDevice ? () => onSelect && onSelect(symbolOption) : undefined}    >
       <img
         src={symbolOption.path}
         alt={symbolOption.name}
