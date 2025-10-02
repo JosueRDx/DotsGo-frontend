@@ -11,7 +11,20 @@ export default function GameResults() {
   const [animationPhase, setAnimationPhase] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const sortedResults = [...results].sort((a, b) => b.score - a.score);
+  const filteredResults = (results || []).filter(player => (player?.score || 0) > 0);
+
+  const sortedResults = [...filteredResults].sort((a, b) => {
+    const scoreDifference = (b.score || 0) - (a.score || 0);
+    if (scoreDifference !== 0) {
+      return scoreDifference;
+    }
+
+    const aTime = Number.isFinite(a?.totalResponseTime) ? a.totalResponseTime : Number.POSITIVE_INFINITY;
+    const bTime = Number.isFinite(b?.totalResponseTime) ? b.totalResponseTime : Number.POSITIVE_INFINITY;
+    return aTime - bTime;
+  });
+
+  const topPlayer = sortedResults[0];
 
   useEffect(() => {
     // Secuencia de animaciones
@@ -99,18 +112,18 @@ export default function GameResults() {
       {/* Main Content */}
       <main className={styles.mainContent}>
         {/* Winner Spotlight */}
-        {sortedResults.length > 0 && animationPhase >= 1 && (
+        {topPlayer && animationPhase >= 1 && (
           <div className={`${styles.winnerSpotlight} ${styles.animated}`}>
             <div className={styles.winnerCard}>
               <div className={styles.winnerCrown}>
                 <Crown size={48} />
               </div>
               
-              {sortedResults[0].character && (
+              {topPlayer.character && (
                 <div className={styles.winnerAvatar}>
-                  <img 
-                    src={sortedResults[0].character.image} 
-                    alt={sortedResults[0].character.name}
+                  <img
+                    src={topPlayer.character.image}
+                    alt={topPlayer.character.name}
                     className={styles.winnerImage}
                   />
                 </div>
@@ -118,23 +131,23 @@ export default function GameResults() {
 
               <div className={styles.winnerInfo}>
                 <h2 className={styles.winnerTitle}>🏆 ¡Campeón!</h2>
-                <h3 className={styles.winnerName}>{sortedResults[0].username}</h3>
+                <h3 className={styles.winnerName}>{topPlayer.username}</h3>
                 <div className={styles.winnerScore}>
                   <span className={styles.scoreLabel}>Puntuación Final</span>
-                  <span className={styles.scoreValue}>{sortedResults[0].score}</span>
+                  <span className={styles.scoreValue}>{topPlayer.score}</span>
                 </div>
                 <div className={styles.winnerStats}>
                   <div className={styles.statItem}>
                     <Target size={16} />
-                    <span>{sortedResults[0].correctAnswers}/{sortedResults[0].totalQuestions}</span>
+                    <span>{topPlayer.correctAnswers}/{topPlayer.totalQuestions}</span>
                   </div>
                   <div className={styles.statItem}>
                     <XCircle size={16} />
-                    <span>Incorrectas: {sortedResults[0].totalQuestions - sortedResults[0].correctAnswers}</span>
+                    <span>Incorrectas: {topPlayer.totalQuestions - topPlayer.correctAnswers}</span>
                   </div>
                   <div className={styles.statItem}>
                     <Zap size={16} />
-                    <span>{Math.round((sortedResults[0].correctAnswers / sortedResults[0].totalQuestions) * 100)}%</span>
+                    <span>{Math.round((topPlayer.correctAnswers / topPlayer.totalQuestions) * 100)}%</span>
                   </div>
                 </div>
               </div>
@@ -148,6 +161,9 @@ export default function GameResults() {
             <h3 className={styles.sectionTitle}>📊 Clasificación Final</h3>
             
             <div className={styles.resultsGrid}>
+              {sortedResults.length === 0 && (
+                <div className={styles.noResults}>No hay jugadores con puntaje registrado.</div>
+              )}
               {sortedResults.map((player, index) => (
                 <div
                   key={index}
@@ -232,7 +248,7 @@ export default function GameResults() {
                 <Target size={32} />
                 <div className={styles.summaryInfo}>
                   <span className={styles.summaryLabel}>Preguntas</span>
-                  <span className={styles.summaryValue}>{sortedResults[0]?.totalQuestions || 0}</span>
+                  <span className={styles.summaryValue}>{topPlayer?.totalQuestions || 0}</span>
                 </div>
               </div>
               
@@ -240,7 +256,7 @@ export default function GameResults() {
                 <Trophy size={32} />
                 <div className={styles.summaryInfo}>
                   <span className={styles.summaryLabel}>Puntuación Máxima</span>
-                  <span className={styles.summaryValue}>{sortedResults[0]?.score || 0}</span>
+                  <span className={styles.summaryValue}>{topPlayer?.score || 0}</span>
                 </div>
               </div>
               
@@ -249,11 +265,13 @@ export default function GameResults() {
                 <div className={styles.summaryInfo}>
                   <span className={styles.summaryLabel}>Precisión Promedio</span>
                   <span className={styles.summaryValue}>
-                    {Math.round(
-                      sortedResults.reduce((acc, player) => 
-                        acc + (player.correctAnswers / player.totalQuestions) * 100, 0
-                      ) / sortedResults.length
-                    )}%
+                    {sortedResults.length > 0
+                      ? Math.round(
+                          sortedResults.reduce((acc, player) =>
+                            acc + (player.correctAnswers / player.totalQuestions) * 100, 0
+                          ) / sortedResults.length
+                        )
+                      : 0}%
                   </span>
                 </div>
               </div>
