@@ -367,7 +367,7 @@ export default function Game() {
     if (!question) {
       return;
     }
-    
+
     setTopColor(null);
     setBottomColor(null);
     setSymbol(null);
@@ -402,15 +402,20 @@ export default function Game() {
 
     const pin = localStorage.getItem("gamePin");
     const username = localStorage.getItem("username");
-    const responseTime = questionTimeLimit !== null ? questionTimeLimit - timeLeft : 0;
+    const parsedLimit = Number(questionTimeLimit);
+    const parsedTimeLeft = Number(timeLeft);
+    const autoResponseTime = Number.isFinite(parsedLimit)
+      ? parsedLimit
+      : (Number.isFinite(parsedTimeLeft) ? parsedTimeLeft : 0);
 
     console.log("Respuesta auto-enviada (tiempo agotado):", answer);
 
     socket.emit("submit-answer", {
       pin: pin,
       answer: answer,
-      responseTime: responseTime,
-      questionId: question?._id
+      responseTime: autoResponseTime,
+      questionId: question?._id,
+      isAutoSubmit: true
     }, (response) => {
       if (response.success) {
         console.log("Respuesta (auto) recibida por el servidor:", response);
@@ -449,7 +454,8 @@ export default function Game() {
       pin: pin,
       answer: answer,
       responseTime: responseTime,
-      questionId: question?._id
+      questionId: question?._id,
+      isAutoSubmit: false
     }, (response) => {
       if (response.success) {
         console.log("Respuesta recibida por el servidor:", response);
