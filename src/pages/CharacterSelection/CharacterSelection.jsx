@@ -19,14 +19,6 @@ import personaje9 from "../../assets/images/personajes/9.png";
 import personaje10 from "../../assets/images/personajes/10.png";
 import personaje11 from "../../assets/images/personajes/11.png";
 
-
-// NUEVO: imágenes de personajes 7–11
-import personaje7 from "../../assets/images/personajes/7.png";
-import personaje8 from "../../assets/images/personajes/8.png";
-import personaje9 from "../../assets/images/personajes/9.png";
-import personaje10 from "../../assets/images/personajes/10.png";
-import personaje11 from "../../assets/images/personajes/11.png";
-
 export default function CharacterSelection() {
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [loading, setLoading] = useState(false);
