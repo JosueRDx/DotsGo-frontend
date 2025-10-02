@@ -9,9 +9,17 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  const handlePinChange = (value) => {
+    const sanitizedValue = value
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 6);
+    setPin(sanitizedValue);
+  };
+
   const handleSubmitPin = () => {
-    if (!pin.trim()) {
-      alert("Por favor, ingresa un PIN válido.");
+    if (pin.length !== 6) {
+      alert("El PIN debe tener 6 caracteres.");
       return;
     }
     setIsLoading(true);
@@ -97,14 +105,14 @@ export default function Home() {
                 type="text"
                 placeholder="Ingresa el PIN"
                 value={pin}
-                onChange={(e) => setPin(e.target.value.toUpperCase())}
+                onChange={(e) => handlePinChange(e.target.value)}
                 className={styles.pinInput}
-                maxLength="8"
+                maxLength="6"
                 onKeyDown={(e) => e.key === "Enter" && handleSubmitPin()}
               />
               <button 
                 onClick={handleSubmitPin}
-                disabled={isLoading || !pin.trim()}
+                disabled={isLoading || pin.length !== 6}
                 className={`${styles.joinBtn} ${isLoading ? styles.loading : ''}`}
               >
                 {isLoading ? (
