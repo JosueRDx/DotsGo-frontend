@@ -31,19 +31,21 @@ export default function Admin() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Estados para crear juego (manteniendo funcionalidad original)
-  const [juegoCreado, setJuegoCreado] = useState(false);
   const [tiempo, setTiempo] = useState("");
   const [codigo, setCodigo] = useState("");
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const [tiempoJuego, setTiempoJuego] = useState("30");
   const [nombreJuego, setNombreJuego] = useState("");
   const [dificultad, setDificultad] = useState("medio");
-  const [players, setPlayers] = useState([]);
-  const [questions, setQuestions] = useState([]);
   const [esperandoResultados, setEsperandoResultados] = useState(false);
+  const [juegoCreado, setJuegoCreado] = useState(false);
+  const [questions, setQuestions] = useState([]);
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
+  const [playerRankings, setPlayerRankings] = useState([]);
+  const [showRanking, setShowRanking] = useState(false);
+  const [players, setPlayers] = useState([]);
   
   const navigate = useNavigate();
 
@@ -95,10 +97,22 @@ export default function Admin() {
       navigate("/game-results", { state: { results } });
     });
 
-    socket.on("game-state-update", (data) => {
+    socket.on("ranking-updated", (data) => {
       console.log("Actualización de estado recibida:", data);
       if (data.players) {
-        setPlayerRankings(data.players);
+        // Asegurarse de que los jugadores tengan los campos necesarios
+        const updatedPlayers = data.players.map(player => ({
+          id: player.id || player._id || Math.random().toString(36).substr(2, 9),
+          username: player.username || 'Jugador',
+          score: player.score || 0,
+          correctAnswers: player.correctAnswers || 0,
+          wrongAnswers: player.wrongAnswers || 0,
+          totalResponseTime: player.totalResponseTime || 0
+        }));
+        
+        // Ordenar jugadores por puntuación (de mayor a menor)
+        const sortedPlayers = [...updatedPlayers].sort((a, b) => b.score - a.score);
+        setPlayerRankings(sortedPlayers);
       }
       if (data.currentQuestion) {
         setCurrentQuestion(data.currentQuestion);
@@ -113,7 +127,7 @@ export default function Admin() {
       socket.off("player-joined");
       socket.off("game-started");
       socket.off("game-ended");
-      socket.off("game-state-update"); 
+      socket.off("ranking-updated"); 
       disconnectSocket();
     };
   }, [navigate]);
@@ -177,9 +191,7 @@ export default function Admin() {
         : [...prevSelected, questionId]
     );
   };
-  //Funcion para el raking en tiempo real
-  const [playerRankings, setPlayerRankings] = useState([]);
-
+  
   const selectAllQuestions = () => {
     const allQuestionIds = questions.map(q => q._id);
     setSelectedQuestions(allQuestionIds);
@@ -191,34 +203,36 @@ export default function Admin() {
 
   // Funciones originales del juego
   const handleCrearJuego = () => {
-  if (selectedQuestions.length === 0) {
-    alert("Por favor, selecciona al menos una pregunta antes de crear el juego.");
-    return;
-  }
-
-  console.log(`Admin: Creando juego con ${selectedQuestions.length} preguntas:`, selectedQuestions);
-
-  socket.emit("create-game", { 
-    timeLimit: parseInt(tiempoJuego), 
-    questionIds: selectedQuestions 
-  }, (response) => {
-    if (response.success) {
-      setCodigo(response.pin);
-      setTiempo(tiempoJuego);
-      setJuegoCreado(true);
-      console.log(`Admin: Juego creado con PIN ${response.pin}`);
-    } else {
-      alert(response.error || "Error al crear el juego");
-      console.error("Error al crear juego:", response.error);
+    if (selectedQuestions.length === 0) {
+      alert("Por favor, selecciona al menos una pregunta antes de crear el juego.");
+      return;
     }
-  });
-};
+
+    console.log(`Admin: Creando juego con ${selectedQuestions.length} preguntas:`, selectedQuestions);
+
+    socket.emit("create-game", { 
+      timeLimit: parseInt(tiempoJuego), 
+      questionIds: selectedQuestions 
+    }, (response) => {
+      if (response.success) {
+        setCodigo(response.pin);
+        setTiempo(tiempoJuego);
+        setJuegoCreado(true);
+        console.log(`Admin: Juego creado con PIN ${response.pin}`);
+      } else {
+        alert(response.error || "Error al crear el juego");
+        console.error("Error al crear juego:", response.error);
+      }
+    });
+  };
 
   const handleIniciarJuego = () => {
     setEsperandoResultados(true);
+    setShowRanking(true); // Mostrar el ranking cuando inicia el juego
     socket.emit("start-game", { pin: codigo }, (response) => {
       if (!response.success) {
         setEsperandoResultados(false);
+        setShowRanking(false);
         alert(response.error || "Error al iniciar el juego");
       }
     });
@@ -429,44 +443,53 @@ export default function Admin() {
                       <div className={styles.spinner}></div>
                       <p>Esperando resultados del juego...</p>
                       
-                      {/* COmponente de Ranking */}
-                      {/* Reemplaza el componente de ranking actual con este */}
-                      <div className={styles.liveRanking}>
-                        <h4>🏆 Ranking en Tiempo Real</h4>
-                        <div className={styles.rankingList}>
-                          {playerRankings && playerRankings.length > 0 ? (
-                            playerRankings
-                              .sort((a, b) => b.score - a.score)
-                              .map((player, index) => (
-                                <div key={player.id || index} className={styles.rankingItem}>
-                                  <span className={styles.rankPosition}>#{index + 1}</span>
-                                  <span className={styles.rankPlayerName}>
-                                    {player.username || 'Jugador'}
-                                  </span>
-                                  <span className={styles.rankScore}>
-                                    {player.score || 0} pts
-                                  </span>
-                                  <div className={styles.rankProgress}>
-                                    <div 
-                                      className={styles.progressBar} 
-                                      style={{
-                                        width: `${playerRankings[0].score > 0 ? 
-                                          (player.score / playerRankings[0].score) * 100 : 0}%`
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              ))
-                          ) : (
-                            <div className={styles.noRankings}>
-                              <p>Esperando puntuaciones...</p>
-                              <p className={styles.questionInfo}>
-                                Pregunta actual: {currentQuestion} de {totalQuestions}
-                              </p>
-                            </div>
-                          )}
+                      {/* Componente de Ranking */}
+                      {showRanking && (
+                        <div className={styles.liveRanking}>
+                          <h4>🏆 Ranking en Tiempo Real</h4>
+                          <div className={styles.rankingList}>
+                            {playerRankings && playerRankings.length > 0 ? (
+                              playerRankings
+                                .sort((a, b) => b.score - a.score)
+                                .map((player, index) => {
+                                  const maxScore = playerRankings[0]?.score || 1; // Evitar división por cero
+                                  const progressWidth = maxScore > 0 ? (player.score / maxScore) * 100 : 0;
+                                  
+                                  return (
+                                    <div key={player.id} className={styles.rankingItem}>
+                                      <span className={styles.rankPosition}>#{index + 1}</span>
+                                      <span className={styles.rankPlayerName}>
+                                        {player.username}
+                                      </span>
+                                      <span className={styles.rankScore}>
+                                        {player.score} pts
+                                      </span>
+                                      <div className={styles.rankProgress}>
+                                        <div 
+                                          className={styles.progressBar}
+                                          style={{
+                                            width: `${progressWidth}%`
+                                          }}
+                                        />
+                                      </div>
+                                      <div className={styles.stats}>
+                                        <span className={styles.statItem}>✓ {player.correctAnswers || 0}</span>
+                                        <span className={styles.statItem}>✗ {player.wrongAnswers || 0}</span>
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                            ) : (
+                              <div className={styles.noRankings}>
+                                <p>Esperando jugadores...</p>
+                                <p className={styles.questionInfo}>
+                                  Pregunta actual: {currentQuestion} de {totalQuestions}
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   )}
                 </div>
