@@ -533,7 +533,7 @@ export default function Admin() {
                 </div>
               </div>
             ) : (
-              <div className={styles.gameMonitor}>
+              <div className={`${styles.gameMonitor} ${showRanking ? styles.withRanking : ''}`}>
                 <div className={styles.gameMonitorCard}>
                   <h3>🎉 ¡Juego Creado Exitosamente!</h3>
                   <div className={styles.gameInfo}>
@@ -579,57 +579,56 @@ export default function Admin() {
                     <div className={styles.waitingResults}>
                       <div className={styles.spinner}></div>
                       <p>Esperando resultados del juego...</p>
-                      
-                      {/* Componente de Ranking */}
-                      {showRanking && (
-                        <div className={styles.liveRanking}>
-                          <h4>🏆 Ranking en Tiempo Real</h4>
-                          <div className={styles.rankingList}>
-                            {playerRankings && playerRankings.length > 0 ? (
-                              playerRankings
-                                .sort((a, b) => b.score - a.score)
-                                .map((player, index) => {
-                                  const maxScore = playerRankings[0]?.score || 1; // Evitar división por cero
-                                  const progressWidth = maxScore > 0 ? (player.score / maxScore) * 100 : 0;
-                                  
-                                  return (
-                                    <div key={player.id} className={styles.rankingItem}>
-                                      <span className={styles.rankPosition}>#{index + 1}</span>
-                                      <span className={styles.rankPlayerName}>
-                                        {player.username}
-                                      </span>
-                                      <span className={styles.rankScore}>
-                                        {player.score} pts
-                                      </span>
-                                      <div className={styles.rankProgress}>
-                                        <div 
-                                          className={styles.progressBar}
-                                          style={{
-                                            width: `${progressWidth}%`
-                                          }}
-                                        />
-                                      </div>
-                                      <div className={styles.stats}>
-                                        <span className={styles.statItem}>✓ {player.correctAnswers || 0}</span>
-                                        <span className={styles.statItem}>✗ {player.wrongAnswers || 0}</span>
-                                      </div>
-                                    </div>
-                                  );
-                                })
-                            ) : (
-                              <div className={styles.noRankings}>
-                                <p>Esperando jugadores...</p>
-                                <p className={styles.questionInfo}>
-                                  Pregunta actual: {currentQuestion} de {totalQuestions}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
+
+                {showRanking && (
+                  <div className={styles.liveRanking}>
+                    <h4>🏆 Ranking</h4>
+                    <div className={styles.rankingList}>
+                      {playerRankings && playerRankings.length > 0 ? (
+                        playerRankings
+                          .sort((a, b) => b.score - a.score)
+                          .map((player, index) => {
+                            const maxScore = playerRankings[0]?.score || 1;
+                            const progressWidth = maxScore > 0 ? (player.score / maxScore) * 100 : 0;
+                            
+                            return (
+                              <div key={player.id} className={styles.rankingItem}>
+                                <span className={styles.rankPosition}>#{index + 1}</span>
+                                <span className={styles.rankPlayerName}>
+                                  {player.username}
+                                </span>
+                                <span className={styles.rankScore}>
+                                  {player.score} pts
+                                </span>
+                                <div className={styles.rankProgress}>
+                                  <div 
+                                    className={styles.progressBar}
+                                    style={{
+                                      width: `${progressWidth}%`
+                                    }}
+                                  />
+                                </div>
+                                <div className={styles.stats}>
+                                  <span className={styles.statItem}>✓ {player.correctAnswers || 0}</span>
+                                  <span className={styles.statItem}>✗ {player.wrongAnswers || 0}</span>
+                                </div>
+                              </div>
+                            );
+                          })
+                      ) : (
+                        <div className={styles.noRankings}>
+                          <p>Esperando jugadores...</p>
+                          <p className={styles.questionInfo}>
+                            Pregunta actual: {currentQuestion} de {totalQuestions}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

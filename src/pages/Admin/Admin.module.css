@@ -1491,3 +1491,36 @@
   background: linear-gradient(90deg, #4ade80, #2563eb);
   transition: width 0.3s ease;
 }
+/* Game Monitor */
+.gameMonitor {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  width: 100%;
+  align-items: start;
+  transition: all 0.4s ease;
+}
+
+/* Cuando hay ranking, cambia a grid */
+.gameMonitor.withRanking {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-content: stretch;
+}
+
+.gameMonitorCard {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 30px;
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+  transition: all 0.4s ease;
+}
+
+/* Cuando hay ranking, elimina el max-width */
+.gameMonitor.withRanking .gameMonitorCard {
+  max-width: none;
+}
