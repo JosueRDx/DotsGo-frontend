@@ -3,6 +3,7 @@ import { useDrop } from 'react-dnd';
 import './LivePreviewRombo.module.css';
 import { ItemTypes } from '../Designer/ItemTypes';
 import styles from './LivePreviewRombo.module.css';
+import gameStyles from '../../../pages/Game/Game.module.css';
 
 const LivePreviewRombo = ({
   topColorOption,
@@ -17,6 +18,7 @@ const LivePreviewRombo = ({
   onNumberDrop,
   isTouchDevice = false,
   onZoneTap,
+  selectedItem 
 }) => {
   const [{ isOverTop, canDropTop, draggedItemTypeTop }, dropTopRef] = useDrop(() => ({
     accept: [ItemTypes.COLOR_SWATCH, ItemTypes.SYMBOL_ICON, ItemTypes.NUMBER_BADGE],
@@ -69,6 +71,10 @@ const LivePreviewRombo = ({
       ? `${topBackground}, ${bottomBackground}`
       : `linear-gradient(to bottom, ${topBackground} 0%, ${topBackground} 50%, ${bottomBackground} 50%, ${bottomBackground} 100%)`;
 
+  const isAnyZoneActive = () => {
+    return isZoneActive('top') || isZoneActive('bottom');
+  };
+
   const romboInnerStyles = {
     width: 'min(40vw, 360px)',
     height: 'min(40vw, 360px)',
@@ -78,8 +84,9 @@ const LivePreviewRombo = ({
     flexDirection: 'column',
     boxSizing: 'border-box',
     border: '2px solid transparent',
-    transition: 'box-shadow 0.3s ease',
+    transition: 'all 0.3s ease',
     background: '',
+    overflow: 'hidden',
   };
 
   const backgroundLayers = [];
@@ -123,29 +130,19 @@ const LivePreviewRombo = ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    transition: 'outline 0.2s ease',
+    transition: 'all 0.3s ease',
+    position: 'relative',
+    zIndex: 1,
   };
 
   const topDropZoneStyles = {
     ...dropZoneBase,
-    outlineOffset: '-2px',
-    outline:
-      canDropTop && isOverTop
-        ? `3px dashed ${draggedItemTypeTop === ItemTypes.COLOR_SWATCH ? 'orange' : 'green'}`
-        : canDropTop
-        ? `2px dashed ${draggedItemTypeTop === ItemTypes.COLOR_SWATCH ? 'grey' : 'lightgreen'}`
-        : 'none',
+    backgroundColor: isOverTop ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
   };
 
   const bottomDropZoneStyles = {
     ...dropZoneBase,
-    outlineOffset: '-2px',
-    outline:
-      canDropBottom && isOverBottom
-        ? `3px dashed ${draggedItemTypeBottom === ItemTypes.COLOR_SWATCH ? 'orange' : 'green'}`
-        : canDropBottom
-        ? `2px dashed ${draggedItemTypeBottom === ItemTypes.COLOR_SWATCH ? 'grey' : 'lightgreen'}`
-        : 'none',
+    backgroundColor: isOverBottom ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
   };
 
   const logoStyles = {
@@ -181,15 +178,51 @@ const LivePreviewRombo = ({
 
   const isEmpty = !topColorOption && !bottomColorOption && !symbolOption && !number;
 
+  // Función para determinar si una zona debe estar activa
+  const isZoneActive = (zone) => {
+    if (!selectedItem && !draggedItemTypeTop && !draggedItemTypeBottom) return false;
+    
+    const activeType = selectedItem?.type || draggedItemTypeTop || draggedItemTypeBottom;
+    const isDraggingColor = draggedItemTypeTop === ItemTypes.COLOR_SWATCH || draggedItemTypeBottom === ItemTypes.COLOR_SWATCH;
+    
+    // Para colores, solo activar la zona correspondiente
+    if (activeType === 'color' || isDraggingColor) {
+      if (zone === 'top' && !topColorOption) return true;
+      if (zone === 'bottom' && !bottomColorOption) return true;
+      return false;
+    }
+    
+    // Para símbolos y números
+    switch (activeType) {
+      case ItemTypes.SYMBOL_ICON:
+      case 'symbol':
+        return !symbolOption && (zone === symbolPosition || !symbolPosition);
+      case ItemTypes.NUMBER_BADGE:
+      case 'number':
+        return !number && (zone === numberPosition || !numberPosition);
+      default:
+        return false;
+    }
+  };
+
+  // Función para obtener las clases de una zona
+  const getZoneClasses = (zone, baseClasses) => {
+    const isActive = isZoneActive(zone);
+    return `${baseClasses} ${styles.dropZone} ${isActive ? gameStyles.activeDropZone : ''}`;
+  };
+
   return (
     <div className="rombo-container">
       <div className="rombo-outer">
-        <div className={styles['rombo-inner']} style={romboInnerStyles}>
+        <div 
+          className={`${styles['rombo-inner']} ${isAnyZoneActive() ? gameStyles.activeRombo : ''}`} 
+          style={romboInnerStyles}>
           <div className="rombo-border-inner" />
           <div
             ref={dropTopRef}
             style={topDropZoneStyles}
             onClick={isTouchDevice ? () => onZoneTap && onZoneTap('top') : undefined}
+            className={getZoneClasses('top', '')}
           >
             {isEmpty && !isOverTop && !isOverBottom && (
               <span className="rombo-drop-hint">
@@ -205,6 +238,7 @@ const LivePreviewRombo = ({
             ref={dropBottomRef}
             style={bottomDropZoneStyles}
             onClick={isTouchDevice ? () => onZoneTap && onZoneTap('bottom') : undefined}
+            className={getZoneClasses('bottom', '')}
           ></div>
           
           {symbolOption?.path && (

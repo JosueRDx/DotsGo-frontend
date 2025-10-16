@@ -585,6 +585,7 @@ export default function Game() {
                   onNumberDrop={handleNumberDrop}
                   isTouchDevice={isTouchDevice}
                   onZoneTap={handleZoneTap}
+                  selectedItem={selectedItem}
                 />
               </div>
             </section>

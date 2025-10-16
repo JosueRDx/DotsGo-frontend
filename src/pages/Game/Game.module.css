@@ -270,8 +270,8 @@
 
 /* Preview Section */
 .previewSection {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(16, 185, 129, 0.03));
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: linear-gradient(135deg, rgba(47, 45, 49, 0.3), rgba(47, 45, 49, 0.2));
+  border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   padding: 0.5rem;
   display: flex;
@@ -286,7 +286,6 @@
   width: 120px;
   height: 120px;
   background: rgba(139, 92, 246, 0.1);
-  border: 2px solid rgba(139, 92, 246, 0.3);
   transform: rotate(45deg);
   display: flex;
   align-items: center;
@@ -329,6 +328,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  color: #475569;
 }
 
 .sectionTitle {
@@ -600,6 +600,53 @@
 .statusMessage svg {
   color: #8b5cf6;
   animation: spin 2s linear infinite;
+}
+
+/* Animaciones para zonas interactivas del rombo */
+@keyframes pulseRombo {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.activeRombo {
+  animation: pulseRombo 2s infinite ease-in-out !important;
+  position: relative !important;
+  z-index: 2;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.activeDropZone {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes glowPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.dropZone {
+  position: relative;
+  transition: all 0.3s ease;
 }
 
 /* RESPONSIVE DESIGN - CORREGIDO para móviles */

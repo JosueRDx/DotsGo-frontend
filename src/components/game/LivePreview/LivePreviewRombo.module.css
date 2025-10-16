@@ -6,21 +6,26 @@
   width: 100%;
   height: 100%;
   min-height: 120px;
-  overflow: visible; /* CORREGIDO: Permitir que el rombo se vea completo */
+  overflow: visible;
+  perspective: 1000px;
+  background-color: #000000;
+  border-radius: 8px;
 }
 
 .rombo-outer {
-  width: min(35vw, 200px); /* CORREGIDO: Tamaño más pequeño pero visible */
+  width: min(35vw, 200px);
   height: min(35vw, 200px);
-  background-color: transparent;
+  background-color: #000000;
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
   display: flex;
   justify-content: center;
   align-items: center;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
   position: relative;
   z-index: 1;
+  transform-style: preserve-3d;
+  padding: 3px;
 }
 
 .rombo-inner {
@@ -32,7 +37,19 @@
   position: relative;
   z-index: 1;
   background-color: transparent;
-  overflow: visible;
+  transition: all 0.3s ease;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.rombo-inner::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: transparent;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  z-index: -1;
+  transition: all 0.3s ease;
 }
 
 .rombo-drop-hint {
