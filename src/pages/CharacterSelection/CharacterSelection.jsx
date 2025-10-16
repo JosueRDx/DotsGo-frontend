@@ -38,7 +38,7 @@ export default function CharacterSelection() {
     },
     { 
       id: 2, 
-      name: 'Safety Master', 
+      name: 'Maestro Seguro', 
       image: personaje2,
       specialty: 'Guardián de la Seguridad',
       description: 'Especialista en prevención de riesgos y protocolos de emergencia.',
@@ -47,7 +47,7 @@ export default function CharacterSelection() {
     },
     { 
       id: 3, 
-      name: 'Lab Expert', 
+      name: 'Genio del Lab', 
       image: personaje3,
       specialty: 'Científico de Laboratorio',
       description: 'Conoce cada equipo y procedimiento de laboratorio a la perfección.',
@@ -56,7 +56,7 @@ export default function CharacterSelection() {
     },
     { 
       id: 4, 
-      name: 'Fire Guardian', 
+      name: 'Guardián Ígneo', 
       image: personaje4,
       specialty: 'Especialista en Incendios',
       description: 'Experto en sustancias inflamables y sistemas de extinción.',
@@ -65,7 +65,7 @@ export default function CharacterSelection() {
     },
     { 
       id: 5, 
-      name: 'Eco Warrior', 
+      name: 'Eco Guerrero', 
       image: personaje5,
       specialty: 'Protector Ambiental',
       description: 'Defensor del medio ambiente y especialista en sustancias tóxicas.',
@@ -74,7 +74,7 @@ export default function CharacterSelection() {
     },
     { 
       id: 6, 
-      name: 'Hazmat Hero', 
+      name: 'Héroe Químico', 
       image: personaje6,
       specialty: 'Manejo de Materiales Peligrosos',
       description: 'Experto en transporte y almacenamiento de sustancias peligrosas.',
@@ -84,7 +84,7 @@ export default function CharacterSelection() {
         // ====== NUEVOS PERSONAJES ======
     { 
       id: 7, 
-      name: 'BioShield', 
+      name: 'Agente Bio', 
       image: personaje7,
       specialty: 'Bioseguridad',
       description: 'Controla agentes biológicos y domina cabinas de bioseguridad.',
@@ -93,7 +93,7 @@ export default function CharacterSelection() {
     },
     { 
       id: 8, 
-      name: 'CryoTech', 
+      name: 'Experto Polar', 
       image: personaje8,
       specialty: 'Bajas Temperaturas',
       description: 'Especialista en nitrógeno líquido, criogenia y EPP térmico.',
@@ -102,7 +102,7 @@ export default function CharacterSelection() {
     },
     { 
       id: 9, 
-      name: 'Radiant Core', 
+      name: 'Núcleo Atómico', 
       image: personaje9,
       specialty: 'Radioprotección',
       description: 'Gestiona fuentes ionizantes y protocolos ALARA.',
@@ -111,7 +111,7 @@ export default function CharacterSelection() {
     },
     { 
       id: 10, 
-      name: 'Waste Wizard', 
+      name: 'Mago Residual', 
       image: personaje10,
       specialty: 'Gestión de Residuos',
       description: 'Clasifica, neutraliza y dispone residuos peligrosos sin errores.',
@@ -120,7 +120,7 @@ export default function CharacterSelection() {
     },
     { 
       id: 11, 
-      name: 'Protocol Prime', 
+      name: 'Jefe de Normas', 
       image: personaje11,
       specialty: 'Normativa & Auditoría',
       description: 'Memoriza normas, auditorías y checklists como nadie.',
