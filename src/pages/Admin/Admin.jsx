@@ -51,6 +51,48 @@ export default function Admin() {
   
   const navigate = useNavigate();
 
+  const saveGameState = useCallback((newState) => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const existingStateJSON = localStorage.getItem(GAME_STATE_STORAGE_KEY);
+      const existingState = existingStateJSON ? JSON.parse(existingStateJSON) : {};
+      const updatedState = { ...existingState, ...newState };
+
+      if (Object.keys(updatedState).length === 0) {
+        localStorage.removeItem(GAME_STATE_STORAGE_KEY);
+      } else {
+        localStorage.setItem(GAME_STATE_STORAGE_KEY, JSON.stringify(updatedState));
+      }
+    } catch (error) {
+      console.error("Error al guardar el estado del juego:", error);
+    }
+  }, []);
+
+  const resetGame = useCallback(() => {
+    setActiveSection('crear-juego');
+    setTiempo("");
+    setCodigo("");
+    setSelectedQuestions([]);
+    setTiempoJuego("30");
+    setNombreJuego("");
+    setDificultad("medio");
+    setEsperandoResultados(false);
+    setJuegoCreado(false);
+    setCurrentQuestion(0);
+    setTotalQuestions(0);
+    setPlayerRankings([]);
+    setShowRanking(false);
+    setPlayers([]);
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(GAME_STATE_STORAGE_KEY);
+      } catch (error) {
+        console.error("Error al limpiar el estado del juego:", error);
+      }
+    }
+  }, []);
 
 
   // Detectar tamaño de pantalla
