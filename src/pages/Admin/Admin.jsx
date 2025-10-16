@@ -128,7 +128,15 @@ export default function Admin() {
   useEffect(() => {
     connectSocket();
 
-    const handlePlayerJoined = ({ players }) => {
+    const handlePlayerJoined = ({ players = [] }) => {
+      setPlayers(players);
+    };
+
+    const handlePlayerLeft = ({ players = [] }) => {
+      setPlayers(players);
+    };
+
+    const handlePlayersUpdated = ({ players = [] }) => {
       setPlayers(players);
     };
 
@@ -223,6 +231,8 @@ export default function Admin() {
     socket.on("player-joined", handlePlayerJoined);
     socket.on("game-ended", handleGameEnded);
     socket.on("connect", attemptRejoin);
+    socket.on("player-left", handlePlayerLeft);
+    socket.on("players-updated", handlePlayersUpdated);
 
     if (socket.connected) {
       attemptRejoin();
@@ -258,8 +268,10 @@ export default function Admin() {
       socket.off("player-joined", handlePlayerJoined);
       socket.off("game-ended", handleGameEnded);
       socket.off("connect", attemptRejoin);
+      socket.off("player-left", handlePlayerLeft);
+      socket.off("players-updated", handlePlayersUpdated);
       socket.off("game-started");
-      socket.off("ranking-updated"); 
+      socket.off("ranking-updated");
       disconnectSocket();
     };
   }, [navigate, resetGame, saveGameState]);
