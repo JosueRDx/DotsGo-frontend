@@ -11,11 +11,34 @@ export default function GameResults() {
   const [animationPhase, setAnimationPhase] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const allResults = results || [];
+  const allResults = Array.isArray(results) ? results : [];
 
-  const filteredResults = allResults.filter(player => (player?.score || 0) > 0);
+  const normalizePlayerResult = (player = {}) => {
+    const parsedScore = Number(player?.score);
+    const parsedCorrect = Number(player?.correctAnswers);
+    const parsedTotalQuestions = Number(player?.totalQuestions);
+    const parsedResponseTime = Number(player?.totalResponseTime);
 
-  const sortedResults = [...filteredResults].sort((a, b) => {
+    return {
+      ...player,
+      score: Number.isFinite(parsedScore) ? parsedScore : 0,
+      correctAnswers: Number.isFinite(parsedCorrect) ? parsedCorrect : 0,
+      totalQuestions: Number.isFinite(parsedTotalQuestions)
+        ? parsedTotalQuestions
+        : (Array.isArray(player?.questionOrder) ? player.questionOrder.length : 0),
+      totalResponseTime: Number.isFinite(parsedResponseTime) ? parsedResponseTime : 0,
+    };
+  };
+
+  const normalizedResults = allResults.map(normalizePlayerResult);
+
+  const hasPositiveScores = normalizedResults.some(player => player.score > 0);
+
+  const displayResults = hasPositiveScores
+    ? normalizedResults.filter(player => player.score > 0)
+    : normalizedResults;
+
+  const sortedResults = [...displayResults].sort((a, b) => {
     const scoreDifference = (b.score || 0) - (a.score || 0);
     if (scoreDifference !== 0) {
       return scoreDifference;
@@ -39,20 +62,20 @@ export default function GameResults() {
     return (correct / total) * 100;
   };
 
-  const totalPlayers = allResults.length;
-  const totalQuestions = allResults.reduce((max, player) => {
+  const totalPlayers = normalizedResults.length;
+  const totalQuestions = normalizedResults.reduce((max, player) => {
     const playerTotal = player?.totalQuestions ?? 0;
     return playerTotal > max ? playerTotal : max;
   }, 0);
 
-  const maxScore = allResults.reduce((max, player) => {
+  const maxScore = normalizedResults.reduce((max, player) => {
     const playerScore = player?.score ?? 0;
     return playerScore > max ? playerScore : max;
   }, 0);
 
   const averageAccuracy = totalPlayers > 0
     ? Math.round(
-        allResults.reduce((sum, player) => sum + calculateAccuracy(player), 0) / totalPlayers
+        normalizedResults.reduce((sum, player) => sum + calculateAccuracy(player), 0) / totalPlayers
       )
     : 0;
 
@@ -177,7 +200,7 @@ export default function GameResults() {
                   </div>
                   <div className={styles.statItem}>
                     <Zap size={16} />
-                    <span>{Math.round((topPlayer.correctAnswers / topPlayer.totalQuestions) * 100)}%</span>
+                    <span>{Math.round(calculateAccuracy(topPlayer))}%</span>
                   </div>
                 </div>
               </div>
