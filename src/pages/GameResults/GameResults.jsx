@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Trophy, Medal, Award, Crown, Users, Target, Zap, Star, Home, RotateCcw, XCircle } from "lucide-react";
+import { Trophy, Medal, Award, Crown, Users, Target, Zap, Star, Home, RotateCcw, XCircle, Timer } from "lucide-react";
 import styles from "./GameResults.module.css";
 import logo from "../../assets/images/logo.png";
 
@@ -11,7 +11,9 @@ export default function GameResults() {
   const [animationPhase, setAnimationPhase] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const filteredResults = (results || []).filter(player => (player?.score || 0) > 0);
+  const allResults = results || [];
+
+  const filteredResults = allResults.filter(player => (player?.score || 0) > 0);
 
   const sortedResults = [...filteredResults].sort((a, b) => {
     const scoreDifference = (b.score || 0) - (a.score || 0);
@@ -25,6 +27,34 @@ export default function GameResults() {
   });
 
   const topPlayer = sortedResults[0];
+
+  const calculateAccuracy = (player) => {
+    const correct = player?.correctAnswers ?? 0;
+    const total = player?.totalQuestions ?? 0;
+
+    if (total === 0) {
+      return 0;
+    }
+
+    return (correct / total) * 100;
+  };
+
+  const totalPlayers = allResults.length;
+  const totalQuestions = allResults.reduce((max, player) => {
+    const playerTotal = player?.totalQuestions ?? 0;
+    return playerTotal > max ? playerTotal : max;
+  }, 0);
+
+  const maxScore = allResults.reduce((max, player) => {
+    const playerScore = player?.score ?? 0;
+    return playerScore > max ? playerScore : max;
+  }, 0);
+
+  const averageAccuracy = totalPlayers > 0
+    ? Math.round(
+        allResults.reduce((sum, player) => sum + calculateAccuracy(player), 0) / totalPlayers
+      )
+    : 0;
 
   useEffect(() => {
     // Secuencia de animaciones
@@ -61,7 +91,7 @@ export default function GameResults() {
   };
 
   const getPerformanceMessage = (player, rank) => {
-    const accuracy = (player.correctAnswers / player.totalQuestions) * 100;
+    const accuracy = calculateAccuracy(player);
     
     if (rank === 1) return "¡Campeón Absoluto!";
     if (rank === 2) return "¡Excelente Trabajo!";
@@ -220,12 +250,80 @@ export default function GameResults() {
                       </div>
                       <div className={styles.statRow}>
                         <Zap size={14} />
-                        <span>Precisión: {Math.round((player.correctAnswers / player.totalQuestions) * 100)}%</span>
+                        <span>Precisión: {Math.round(calculateAccuracy(player))}%</span>
                       </div>
                     </div>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Players Details */}
+        {animationPhase >= 2 && allResults.length > 0 && (
+          <div className={`${styles.playerDetailsSection} ${styles.animated}`}>
+            <h3 className={styles.sectionTitle}>🧑‍🤝‍🧑 Detalle de los Jugadores</h3>
+
+            <div className={styles.playerDetailsGrid}>
+              {allResults.map((player, index) => {
+                const accuracy = Math.round(calculateAccuracy(player));
+                const incorrectAnswers = (player?.totalQuestions ?? 0) - (player?.correctAnswers ?? 0);
+                const totalTime = player?.totalResponseTime ?? null;
+
+                return (
+                  <div key={index} className={styles.playerDetailCard}>
+                    <div className={styles.playerDetailHeader}>
+                      {player?.character && (
+                        <div className={styles.playerDetailAvatar}>
+                          <img
+                            src={player.character.image}
+                            alt={player.character.name}
+                            className={styles.playerDetailImage}
+                          />
+                        </div>
+                      )}
+
+                      <div className={styles.playerDetailInfo}>
+                        <h4 className={styles.playerDetailName}>{player?.username || `Jugador ${index + 1}`}</h4>
+                        <span className={styles.playerDetailCharacter}>
+                          {player?.character?.name || "Sin personaje"}
+                        </span>
+                      </div>
+
+                      <div className={styles.playerDetailScore}>
+                        <span className={styles.playerDetailScoreLabel}>Puntos</span>
+                        <span className={styles.playerDetailScoreValue}>{player?.score ?? 0}</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.playerDetailStats}>
+                      <div className={styles.playerDetailStat}>
+                        <Target size={16} />
+                        <span>Correctas: {player?.correctAnswers ?? 0}</span>
+                      </div>
+                      <div className={styles.playerDetailStat}>
+                        <XCircle size={16} />
+                        <span>Incorrectas: {incorrectAnswers}</span>
+                      </div>
+                      <div className={styles.playerDetailStat}>
+                        <Users size={16} />
+                        <span>Total: {player?.totalQuestions ?? 0}</span>
+                      </div>
+                      <div className={styles.playerDetailStat}>
+                        <Zap size={16} />
+                        <span>Precisión: {accuracy}%</span>
+                      </div>
+                      {totalTime !== null && (
+                        <div className={styles.playerDetailStat}>
+                          <Timer size={16} />
+                          <span>Tiempo: {Math.round(totalTime)}s</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -240,7 +338,7 @@ export default function GameResults() {
                 <Users size={32} />
                 <div className={styles.summaryInfo}>
                   <span className={styles.summaryLabel}>Jugadores</span>
-                  <span className={styles.summaryValue}>{sortedResults.length}</span>
+                  <span className={styles.summaryValue}>{totalPlayers}</span>
                 </div>
               </div>
               
@@ -248,7 +346,7 @@ export default function GameResults() {
                 <Target size={32} />
                 <div className={styles.summaryInfo}>
                   <span className={styles.summaryLabel}>Preguntas</span>
-                  <span className={styles.summaryValue}>{topPlayer?.totalQuestions || 0}</span>
+                  <span className={styles.summaryValue}>{totalQuestions}</span>
                 </div>
               </div>
               
@@ -256,7 +354,7 @@ export default function GameResults() {
                 <Trophy size={32} />
                 <div className={styles.summaryInfo}>
                   <span className={styles.summaryLabel}>Puntuación Máxima</span>
-                  <span className={styles.summaryValue}>{topPlayer?.score || 0}</span>
+                  <span className={styles.summaryValue}>{maxScore}</span>
                 </div>
               </div>
               
@@ -265,13 +363,7 @@ export default function GameResults() {
                 <div className={styles.summaryInfo}>
                   <span className={styles.summaryLabel}>Precisión Promedio</span>
                   <span className={styles.summaryValue}>
-                    {sortedResults.length > 0
-                      ? Math.round(
-                          sortedResults.reduce((acc, player) =>
-                            acc + (player.correctAnswers / player.totalQuestions) * 100, 0
-                          ) / sortedResults.length
-                        )
-                      : 0}%
+                    {averageAccuracy}%
                   </span>
                 </div>
               </div>

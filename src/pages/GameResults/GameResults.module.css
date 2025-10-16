@@ -472,6 +472,166 @@
   color: #10b981;
 }
 
+/* Player Details Section */
+.playerDetailsSection {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 24px;
+  padding: 30px;
+  color: white;
+}
+
+.playerDetailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.playerDetailCard {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.playerDetailCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.5), rgba(168, 85, 247, 0.2));
+}
+
+.playerDetailCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 15px 35px rgba(139, 92, 246, 0.3);
+}
+
+.playerDetailHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.playerDetailAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid rgba(139, 92, 246, 0.4);
+}
+
+.playerDetailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.playerDetailInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.playerDetailName {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.playerDetailCharacter {
+  font-size: 12px;
+  color: #8b5cf6;
+  font-weight: 600;
+}
+
+.playerDetailScore {
+  text-align: right;
+}
+
+.playerDetailScoreLabel {
+  display: block;
+  font-size: 11px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.playerDetailScoreValue {
+  font-size: 24px;
+  font-weight: 800;
+  color: #10b981;
+}
+
+.playerDetailStats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.playerDetailStat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.playerDetailStat svg {
+  color: #8b5cf6;
+}
+
+@media (max-width: 640px) {
+
+  .playerDetailsSection {
+    padding: 15px;
+    border-radius: 16px;
+  }
+  
+  .playerDetailsGrid {
+    gap: 15px;
+  }
+
+  .playerDetailCard {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .playerDetailScoreValue {
+    font-size: 22px;
+  }
+
+  .playerDetailStats {
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 8px;
+  }
+
+  .playerDetailStat {
+    padding: 8px;
+    flex-direction: column; 
+    text-align: center;
+    gap: 4px;
+  }
+
+  .playerDetailName {
+    font-size: 16px;
+  }
+}
+
 /* Action Buttons */
 .actionsSection {
   display: flex;
@@ -626,6 +786,15 @@
     width: 100px;
     height: 100px;
   }
+
+  .playerDetailsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .playerDetailCard {
+    padding: 18px;
+  }
+
 }
 
 @media (max-width: 480px) {
