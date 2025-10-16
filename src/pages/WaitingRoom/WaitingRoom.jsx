@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Users, Crown, Play, Clock, Wifi, WifiOff, Zap } from "lucide-react";
 import styles from "./WaitingRoom.module.css";
 import logo from "../../assets/images/logo.png";
-import { socket } from "../../services/websocket/socketService";
+import { socket, connectSocket } from "../../services/websocket/socketService";
 
 export default function WaitingRoom() {
   const [players, setPlayers] = useState([]);
@@ -14,6 +14,7 @@ export default function WaitingRoom() {
   const [isGameStarting, setIsGameStarting] = useState(false);
   const [transitionPhase, setTransitionPhase] = useState('waiting'); // 'waiting', 'countdown', 'starting', 'transitioning'
   const autoNavigateRef = useRef(false);
+  const rejoinAttemptedRef = useRef(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,8 +29,9 @@ export default function WaitingRoom() {
       return;
     }
 
+    let character;
     try {
-      const character = JSON.parse(characterData);
+      character = JSON.parse(characterData);
       setCurrentUser({ username, character });
 
       // Obtener información del juego
@@ -45,6 +47,34 @@ export default function WaitingRoom() {
       return;
     }
 
+    connectSocket();
+
+    const ensurePlayerPresence = (playerList = []) => {
+      const isPlayerPresent = playerList.some((player) => player.username === username);
+      if (isPlayerPresent) {
+        rejoinAttemptedRef.current = true;
+        return;
+      }
+
+      if (!rejoinAttemptedRef.current && socket.connected) {
+        rejoinAttemptedRef.current = true;
+        socket.emit(
+          "join-game",
+          {
+            pin: gamePin,
+            username,
+            character,
+          },
+          (response) => {
+            if (!response?.success) {
+              console.error("Error al reingresar al juego:", response?.error);
+              rejoinAttemptedRef.current = false;
+            }
+          }
+        );
+      }
+    };
+
     // Socket events
     const navigateToGameInProgress = () => {
       if (!autoNavigateRef.current) {
@@ -54,15 +84,16 @@ export default function WaitingRoom() {
       }
     };
 
-    socket.on("players-updated", (data) => {
+    const handlePlayersUpdated = (data) => {
       console.log("Jugadores actualizados:", data);
       if (data && data.players) {
         setPlayers(data.players);
+        ensurePlayerPresence(data.players);
       }
-    });
+    };
 
     // MEJORADO: Manejo de inicio de juego con fases
-    socket.on("game-starting", (data) => {
+    const handleGameStarting = (data) => {
       console.log("Juego iniciando:", data);
       setIsGameStarting(true);
       setTransitionPhase('countdown');
@@ -71,9 +102,9 @@ export default function WaitingRoom() {
       } else {
         setCountdown(5); // Countdown por defecto
       }
-    });
+    };
 
-    socket.on("game-started", (data) => {
+    const handleGameStarted = (data) => {
       console.log("Juego iniciado:", data);
       setTransitionPhase('starting');
 
@@ -84,12 +115,13 @@ export default function WaitingRoom() {
           navigate("/game");
         }, 1000); // 1 segundo de transición
       }, 500);
-    });
+    };
 
-    socket.on("player-joined", (data) => {
+    const handlePlayerJoined = (data) => {
       console.log("Jugador se unió:", data);
       if (data && data.players) {
         setPlayers(data.players);
+        ensurePlayerPresence(data.players);
       }
       if (data && data.gameInfo) {
         setGameInfo(data.gameInfo);
@@ -98,51 +130,70 @@ export default function WaitingRoom() {
           navigateToGameInProgress();
         }
       }
-    });
+    };
 
-    socket.on("player-left", (data) => {
+    const handlePlayerLeft = (data) => {
       console.log("Jugador salió:", data);
       if (data && data.players) {
         setPlayers(data.players);
+        ensurePlayerPresence(data.players);
       }
-    });
+    };
 
-    socket.on("connect", () => {
+    const fetchPlayers = () => {
+      socket.emit("get-room-players", { pin: gamePin }, (response) => {
+        if (response && response.success && response.players) {
+          console.log("Jugadores obtenidos:", response.players);
+          setPlayers(response.players);
+          ensurePlayerPresence(response.players);
+          if (response.gameInfo) {
+            setGameInfo(response.gameInfo);
+            localStorage.setItem("questionsCount", response.gameInfo.questionsCount);
+            if (response.gameInfo.status === "playing") {
+              navigateToGameInProgress();
+            }
+          }
+        } else {
+          console.log("No se pudieron obtener los jugadores:", response);
+          setPlayers([]);
+          ensurePlayerPresence([]);
+        }
+      });
+    };
+
+    const handleConnect = () => {
       console.log("Socket conectado");
       setConnectionStatus('connected');
-    });
+      if (!rejoinAttemptedRef.current) {
+        fetchPlayers();
+      }
+    };
 
-    socket.on("disconnect", () => {
+    const handleDisconnect = () => {
       console.log("Socket desconectado");
       setConnectionStatus('disconnected');
-    });
+      rejoinAttemptedRef.current = false;
+    };
+
+    socket.on("players-updated", handlePlayersUpdated);
+    socket.on("game-starting", handleGameStarting);
+    socket.on("game-started", handleGameStarted);
+    socket.on("player-joined", handlePlayerJoined);
+    socket.on("player-left", handlePlayerLeft);
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
 
     // Solicitar lista actual de jugadores
-    socket.emit("get-room-players", { pin: gamePin }, (response) => {
-      if (response && response.success && response.players) {
-        console.log("Jugadores obtenidos:", response.players);
-        setPlayers(response.players);
-        if (response.gameInfo) {
-          setGameInfo(response.gameInfo);
-          localStorage.setItem("questionsCount", response.gameInfo.questionsCount);
-          if (response.gameInfo.status === "playing") {
-            navigateToGameInProgress();
-          }
-        }
-      } else {
-        console.log("No se pudieron obtener los jugadores:", response);
-        setPlayers([]);
-      }
-    });
+    fetchPlayers();
 
     return () => {
-      socket.off("players-updated");
-      socket.off("game-starting");
-      socket.off("game-started");
-      socket.off("player-joined");
-      socket.off("player-left");
-      socket.off("connect");
-      socket.off("disconnect");
+      socket.off("players-updated", handlePlayersUpdated);
+      socket.off("game-starting", handleGameStarting);
+      socket.off("game-started", handleGameStarted);
+      socket.off("player-joined", handlePlayerJoined);
+      socket.off("player-left", handlePlayerLeft);
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
     };
   }, [navigate]);
 
