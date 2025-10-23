@@ -1524,3 +1524,18 @@
 .gameMonitor.withRanking .gameMonitorCard {
   max-width: none;
 }
+
+.qrContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.qrLabel {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+}

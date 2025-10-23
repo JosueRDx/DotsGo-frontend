@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { QRCodeSVG } from 'qrcode.react';
 import { socket, connectSocket, disconnectSocket } from "../../services/websocket/socketService";
 import { 
   Gamepad2, 
@@ -544,6 +545,18 @@ export default function Admin() {
                   <div className={styles.gameCode}>
                     <p>Código de Juego</p>
                     <span>{codigo}</span>
+                    {codigo && (
+                      <div className={styles.qrContainer}>
+                        <QRCodeSVG 
+                          value={`https://dotsgo-frontend.onrender.com/join?pin=${codigo}`}
+                          size={128}
+                          level="H"
+                          includeMargin={true}
+                          style={{ background: 'white', padding: '8px', borderRadius: '8px' }}
+                        />
+                        <p className={styles.qrLabel}>Escanea para unirte al juego</p>
+                      </div>
+                    )}
                   </div>
                   
                   <div className={styles.gameActions}>
