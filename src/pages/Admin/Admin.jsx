@@ -2,13 +2,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from 'qrcode.react';
 import { socket, connectSocket, disconnectSocket } from "../../services/websocket/socketService";
-import { 
-  Gamepad2, 
-  BookOpen, 
-  Users, 
-  Star, 
-  BarChart3, 
-  Play, 
+import {
+  Gamepad2,
+  BookOpen,
+  Users,
+  Star,
+  BarChart3,
+  Play,
   Settings,
   Zap,
   FlaskConical,
@@ -24,7 +24,7 @@ import personaje3 from "../../assets/images/personajes/3.png";
 import personaje4 from "../../assets/images/personajes/4.png";
 import personaje5 from "../../assets/images/personajes/5.png";
 import personaje6 from "../../assets/images/personajes/6.png";
-import { API_URL } from "../../utils/constants";
+import { API_URL, FRONTEND_URL } from "../../utils/constants";
 
 const GAME_STATE_STORAGE_KEY = "adminGameState";
 
@@ -32,7 +32,7 @@ export default function Admin() {
   const [activeSection, setActiveSection] = useState('crear-juego');
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+
   // Estados para crear juego (manteniendo funcionalidad original)
   const [tiempo, setTiempo] = useState("");
   const [codigo, setCodigo] = useState("");
@@ -49,7 +49,7 @@ export default function Admin() {
   const [playerRankings, setPlayerRankings] = useState([]);
   const [showRanking, setShowRanking] = useState(false);
   const [players, setPlayers] = useState([]);
-  
+
   const navigate = useNavigate();
 
   const saveGameState = useCallback((newState) => {
@@ -101,7 +101,7 @@ export default function Admin() {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
@@ -123,7 +123,7 @@ export default function Admin() {
         setQuestions(data);
       })
       .catch((err) => console.error("Error definitivo al obtener preguntas en Admin.jsx:", err));
-  }, []); 
+  }, []);
 
   // Socket setup (manteniendo funcionalidad original)
   useEffect(() => {
@@ -251,7 +251,7 @@ export default function Admin() {
           wrongAnswers: player.wrongAnswers || 0,
           totalResponseTime: player.totalResponseTime || 0
         }));
-        
+
         // Ordenar jugadores por puntuación (de mayor a menor)
         const sortedPlayers = [...updatedPlayers].sort((a, b) => b.score - a.score);
         setPlayerRankings(sortedPlayers);
@@ -289,34 +289,34 @@ export default function Admin() {
 
   // Datos de personajes actualizados con imágenes reales
   const characters = [
-    { 
-      id: 1, 
-      name: 'Químico Pro', 
+    {
+      id: 1,
+      name: 'Químico Pro',
       image: personaje1
     },
-    { 
-      id: 2, 
-      name: 'Safety Master', 
+    {
+      id: 2,
+      name: 'Safety Master',
       image: personaje2
     },
-    { 
-      id: 3, 
-      name: 'Lab Expert', 
+    {
+      id: 3,
+      name: 'Lab Expert',
       image: personaje3
     },
-    { 
-      id: 4, 
-      name: 'Fire Guardian', 
+    {
+      id: 4,
+      name: 'Fire Guardian',
       image: personaje4
     },
-    { 
-      id: 5, 
-      name: 'Eco Warrior', 
+    {
+      id: 5,
+      name: 'Eco Warrior',
       image: personaje5
     },
-    { 
-      id: 6, 
-      name: 'Hazmat Hero', 
+    {
+      id: 6,
+      name: 'Hazmat Hero',
       image: personaje6
     }
   ];
@@ -336,7 +336,7 @@ export default function Admin() {
         : [...prevSelected, questionId]
     );
   };
-  
+
   const selectAllQuestions = () => {
     const allQuestionIds = questions.map(q => q._id);
     setSelectedQuestions(allQuestionIds);
@@ -355,9 +355,9 @@ export default function Admin() {
 
     console.log(`Admin: Creando juego con ${selectedQuestions.length} preguntas:`, selectedQuestions);
 
-  socket.emit("create-game", {
-    timeLimit: parseInt(tiempoJuego),
-    questionIds: selectedQuestions
+    socket.emit("create-game", {
+      timeLimit: parseInt(tiempoJuego),
+      questionIds: selectedQuestions
     }, (response) => {
       if (response.success) {
         setCodigo(response.pin);
@@ -395,7 +395,7 @@ export default function Admin() {
               <h2>🎮 Crear Nuevo Juego</h2>
               <p>Diseña experiencias educativas únicas</p>
             </div>
-            
+
             <div className={styles.statsGrid}>
               {gameStats.map((stat, index) => (
                 <div key={index} className={styles.statCard}>
@@ -413,41 +413,41 @@ export default function Admin() {
               <div className={styles.gameCreationContainer}>
                 <div className={styles.creationForm}>
                   <div className={styles.formCard}>
-                    <h3><Zap size={20} style={{display: 'inline', marginRight: '8px'}} />Configuración Rápida</h3>
-                    
+                    <h3><Zap size={20} style={{ display: 'inline', marginRight: '8px' }} />Configuración Rápida</h3>
+
                     <div className={styles.formGroup}>
                       <label>Nombre del Juego</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         placeholder="Ej: Aventura Química Nivel 1"
                         value={nombreJuego}
                         onChange={(e) => setNombreJuego(e.target.value)}
                       />
                     </div>
-                    
+
                     <div className={styles.formGroup}>
                       <label>Tiempo por Pregunta (segundos)</label>
                       <div className={styles.timeSelector}>
-                        <button 
+                        <button
                           className={`${styles.timeBtn} ${tiempoJuego === '30' ? styles.active : ''}`}
                           onClick={() => setTiempoJuego('30')}
                         >
                           30s
                         </button>
-                        <button 
+                        <button
                           className={`${styles.timeBtn} ${tiempoJuego === '60' ? styles.active : ''}`}
                           onClick={() => setTiempoJuego('60')}
                         >
                           60s
                         </button>
-                        <button 
+                        <button
                           className={`${styles.timeBtn} ${tiempoJuego === '90' ? styles.active : ''}`}
                           onClick={() => setTiempoJuego('90')}
                         >
                           90s
                         </button>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           placeholder="Custom"
                           value={tiempoJuego}
                           onChange={(e) => setTiempoJuego(e.target.value)}
@@ -456,23 +456,23 @@ export default function Admin() {
                         />
                       </div>
                     </div>
-                    
+
                     <div className={styles.formGroup}>
                       <label>Dificultad</label>
                       <div className={styles.difficultySelector}>
-                        <button 
+                        <button
                           className={`${styles.diffBtn} ${styles.easy} ${dificultad === 'facil' ? styles.active : ''}`}
                           onClick={() => setDificultad('facil')}
                         >
                           Fácil
                         </button>
-                        <button 
+                        <button
                           className={`${styles.diffBtn} ${styles.medium} ${dificultad === 'medio' ? styles.active : ''}`}
                           onClick={() => setDificultad('medio')}
                         >
                           Medio
                         </button>
-                        <button 
+                        <button
                           className={`${styles.diffBtn} ${styles.hard} ${dificultad === 'dificil' ? styles.active : ''}`}
                           onClick={() => setDificultad('dificil')}
                         >
@@ -484,13 +484,13 @@ export default function Admin() {
                     <div className={styles.formGroup}>
                       <label>Preguntas Seleccionadas ({selectedQuestions.length})</label>
                       <div className={styles.questionsActions}>
-                        <button 
+                        <button
                           className={styles.selectAllBtn}
                           onClick={selectAllQuestions}
                         >
                           Seleccionar Todas
                         </button>
-                        <button 
+                        <button
                           className={styles.clearAllBtn}
                           onClick={clearAllQuestions}
                         >
@@ -498,35 +498,34 @@ export default function Admin() {
                         </button>
                       </div>
                     </div>
-                    
-                    <button 
-                      className={styles.createBtn} 
+
+                    <button
+                      className={styles.createBtn}
                       onClick={handleCrearJuego}
                       disabled={selectedQuestions.length === 0}
                     >
-                      <span><Play size={16} style={{marginRight: '8px'}} />Crear Juego</span>
+                      <span><Play size={16} style={{ marginRight: '8px' }} />Crear Juego</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Lista de Preguntas */}
                 <div className={styles.questionsContainer}>
-                  <h3><BookOpen size={20} style={{display: 'inline', marginRight: '8px'}} />Seleccionar Preguntas</h3>
+                  <h3><BookOpen size={20} style={{ display: 'inline', marginRight: '8px' }} />Seleccionar Preguntas</h3>
                   <div className={styles.questionsGrid}>
                     {questions.map((question) => (
                       <div
                         key={question._id}
-                        className={`${styles.questionCard} ${
-                          selectedQuestions.includes(question._id) ? styles.questionCardSelected : ""
-                        }`}
+                        className={`${styles.questionCard} ${selectedQuestions.includes(question._id) ? styles.questionCardSelected : ""
+                          }`}
                         data-type={question.title.toLowerCase()}
                         onClick={() => toggleQuestionSelection(question._id)}
                       >
                         <h4>{question.title}</h4>
                         <div className={styles.questionDetails}>
-                          <span><FlaskConical size={14} style={{marginRight: '4px'}} />{question.correctAnswer.pictogram}</span>
-                          <span><Palette size={14} style={{marginRight: '4px'}} />{question.correctAnswer.colors?.length || 0} colores</span>
-                          <span><Hash size={14} style={{marginRight: '4px'}} />{question.correctAnswer.number}</span>
+                          <span><FlaskConical size={14} style={{ marginRight: '4px' }} />{question.correctAnswer.pictogram}</span>
+                          <span><Palette size={14} style={{ marginRight: '4px' }} />{question.correctAnswer.colors?.length || 0} colores</span>
+                          <span><Hash size={14} style={{ marginRight: '4px' }} />{question.correctAnswer.number}</span>
                         </div>
                       </div>
                     ))}
@@ -547,8 +546,8 @@ export default function Admin() {
                     <span>{codigo}</span>
                     {codigo && (
                       <div className={styles.qrContainer}>
-                        <QRCodeSVG 
-                          value={`https://dotsgo-frontend.onrender.com/join?pin=${codigo}`}
+                        <QRCodeSVG
+                          value={`${FRONTEND_URL}/join?pin=${codigo}`}
                           size={128}
                           level="H"
                           includeMargin={true}
@@ -558,10 +557,10 @@ export default function Admin() {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className={styles.gameActions}>
-                    <button 
-                      className={styles.startGameBtn} 
+                    <button
+                      className={styles.startGameBtn}
                       onClick={handleIniciarJuego}
                       disabled={esperandoResultados}
                     >
@@ -571,7 +570,7 @@ export default function Admin() {
                       🔄 Crear Otro Juego
                     </button>
                   </div>
-                  
+
                   <div className={styles.connectedPlayers}>
                     <h4>👥 Usuarios Conectados ({players.length})</h4>
                     <div className={styles.playersList}>
@@ -606,7 +605,7 @@ export default function Admin() {
                           .map((player, index) => {
                             const maxScore = playerRankings[0]?.score || 1;
                             const progressWidth = maxScore > 0 ? (player.score / maxScore) * 100 : 0;
-                            
+
                             return (
                               <div key={player.id} className={styles.rankingItem}>
                                 <span className={styles.rankPosition}>#{index + 1}</span>
@@ -617,7 +616,7 @@ export default function Admin() {
                                   {player.score} pts
                                 </span>
                                 <div className={styles.rankProgress}>
-                                  <div 
+                                  <div
                                     className={styles.progressBar}
                                     style={{
                                       width: `${progressWidth}%`
@@ -654,13 +653,13 @@ export default function Admin() {
               <h2>👾 Mis Personajes</h2>
               <p>Selecciona tu avatar favorito</p>
             </div>
-            
+
             <div className={styles.charactersGrid}>
               {characters.map((character) => (
                 <div key={character.id} className={styles.characterCard}>
                   <div className={styles.characterAvatar}>
-                    <img 
-                      src={character.image} 
+                    <img
+                      src={character.image}
                       alt={character.name}
                       className={styles.characterImage}
                     />
@@ -682,7 +681,7 @@ export default function Admin() {
               <h2>📚 Mis Sets de Preguntas</h2>
               <p>Organiza y gestiona tus contenidos</p>
             </div>
-            
+
             <div className={styles.setsGrid}>
               <div className={`${styles.setCard} ${styles.featured}`}>
                 <div className={styles.setHeader}>
@@ -692,13 +691,13 @@ export default function Admin() {
                 <h3>Set Principal de Preguntas</h3>
                 <p>Conjunto completo de preguntas sobre sustancias peligrosas y pictogramas de seguridad</p>
                 <div className={styles.setStats}>
-                  <span><Star size={14} style={{marginRight: '4px'}} />0.0</span>
-                  <span><Users size={14} style={{marginRight: '4px'}} />0 jugadores</span>
-                  <span><Gamepad2 size={14} style={{marginRight: '4px'}} />0 partidas</span>
+                  <span><Star size={14} style={{ marginRight: '4px' }} />0.0</span>
+                  <span><Users size={14} style={{ marginRight: '4px' }} />0 jugadores</span>
+                  <span><Gamepad2 size={14} style={{ marginRight: '4px' }} />0 partidas</span>
                 </div>
                 <button className={styles.setAction}>Editar Set</button>
               </div>
-              
+
               <div className={styles.setCard}>
                 <div className={styles.setHeader}>
                   <span className={styles.setQuestions}>0 preguntas</span>
@@ -706,9 +705,9 @@ export default function Admin() {
                 <h3>Set Personalizado</h3>
                 <p>Crea tu propio conjunto de preguntas personalizadas</p>
                 <div className={styles.setStats}>
-                  <span><Star size={14} style={{marginRight: '4px'}} />0.0</span>
-                  <span><Users size={14} style={{marginRight: '4px'}} />0 jugadores</span>
-                  <span><Gamepad2 size={14} style={{marginRight: '4px'}} />0 partidas</span>
+                  <span><Star size={14} style={{ marginRight: '4px' }} />0.0</span>
+                  <span><Users size={14} style={{ marginRight: '4px' }} />0 jugadores</span>
+                  <span><Gamepad2 size={14} style={{ marginRight: '4px' }} />0 partidas</span>
                 </div>
                 <button className={styles.setAction}>Crear Set</button>
               </div>
@@ -746,7 +745,7 @@ export default function Admin() {
       {/* Mobile Header */}
       {isMobile && (
         <div className={styles.mobileHeader}>
-          <button 
+          <button
             className={styles.menuToggle}
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
@@ -761,9 +760,9 @@ export default function Admin() {
       <div className={`${styles.sidebar} ${isMobile ? (sidebarOpen ? styles.open : styles.closed) : ''}`}>
         <div className={styles.sidebarHeader}>
           <div className={styles.logo}>
-            <img 
-              src={logo} 
-              alt="Logo" 
+            <img
+              src={logo}
+              alt="Logo"
               className={styles.logoImage}
             />
           </div>
