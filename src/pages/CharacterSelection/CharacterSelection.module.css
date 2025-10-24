@@ -407,9 +407,10 @@
 /* Error Message */
 .errorMessage {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   color: #fca5a5;
   font-size: 16px;
   font-weight: 500;
@@ -419,6 +420,35 @@
   border-radius: 12px;
   border: 1px solid rgba(239, 68, 68, 0.3);
   backdrop-filter: blur(20px);
+}
+
+.errorContent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.changeNameButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.changeNameButton:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.6);
+  transform: translateY(-1px);
 }
 
 /* Loading Overlay */

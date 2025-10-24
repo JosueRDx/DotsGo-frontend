@@ -7,7 +7,7 @@
   box-sizing: border-box;
 }
 
-/* Game Wrapper - CORREGIDO: Padding-top específico para móviles */
+/* Game Wrapper - OPTIMIZADO: Padding dinámico según dispositivo */
 .gameWrapper {
   width: 100vw;
   min-height: 100vh;
@@ -17,7 +17,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  /* CORREGIDO: Padding-top mayor para móviles */
+  /* OPTIMIZADO: Padding base para desktop */
   padding: 80px 0.5rem 0.5rem 0.5rem;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
@@ -83,7 +83,7 @@
   opacity: 0.9;
 }
 
-/* Game Container - CORREGIDO: Altura específica para móviles */
+/* Game Container - OPTIMIZADO: Altura dinámica y mejor uso del espacio */
 .gameContainer {
   background: rgba(255, 255, 255, 0.95);
   width: 100%;
@@ -100,19 +100,18 @@
   border: 1px solid rgba(139, 92, 246, 0.2);
   position: relative;
   z-index: 2;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
-/* Question Header - Compacto */
+/* Question Header - OPTIMIZADO: Más compacto y eficiente */
 .questionHeader {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.05));
   border-radius: 10px;
   border: 1px solid rgba(139, 92, 246, 0.2);
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
+  padding: 0.6rem;
+  margin-bottom: 0.4rem;
   flex-shrink: 0;
-  min-height: 80px;
+  min-height: 70px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -258,7 +257,7 @@
   text-overflow: ellipsis;
 }
 
-/* LAYOUT PRINCIPAL - Sin espacios excesivos */
+/* LAYOUT PRINCIPAL - OPTIMIZADO: Mejor distribución del espacio */
 .gameLayout {
   flex: 1;
   display: grid;
@@ -266,19 +265,21 @@
   gap: 0.5rem;
   overflow: hidden;
   min-height: 0;
+  height: 100%;
 }
 
-/* Preview Section */
+/* Preview Section - OPTIMIZADO: Mejor uso del espacio disponible */
 .previewSection {
   background: linear-gradient(135deg, rgba(47, 45, 49, 0.3), rgba(47, 45, 49, 0.2));
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 12px;
-  padding: 0.5rem;
+  padding: 0.4rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  min-height: 200px;
 }
 
 /* Rombo - Estilos mejorados para móviles */
@@ -346,13 +347,14 @@
   color: #8b5cf6;
 }
 
-/* Controls Section - CORREGIDO: Sin espacios vacíos */
+/* Controls Section - OPTIMIZADO: Distribución eficiente del espacio */
 .controlsSection {
   display: flex;
   flex-direction: column;
-  gap: 0; /* ELIMINADO: Era 0.5rem */
+  gap: 0.3rem;
   overflow: hidden;
   min-height: 0;
+  height: 100%;
 }
 
 .controlCard {
@@ -674,135 +676,125 @@
   }
 }
 
-/* MÓVILES - CORREGIDO: Padding-top mayor para evitar que el header tape */
+/* MÓVILES - OPTIMIZADO: Layout vertical eficiente */
 @media (max-width: 767px) {
   .gameWrapper {
-    /* CORREGIDO: Padding-top de 120px para móviles con header alto */
-    padding: 120px 0.25rem 0.25rem 0.25rem;
+    /* OPTIMIZADO: Padding ajustado según altura real del header (50px + margen) */
+    padding: 60px 0.25rem 0.25rem 0.25rem;
   }
   
   .gameContainer {
-    /* CORREGIDO: Altura ajustada para móviles */
-    min-height: calc(100vh - 120px);
-    padding: 0.5rem;
+    /* OPTIMIZADO: Mejor uso de la altura disponible */
+    min-height: calc(100vh - 60px);
+    padding: 0.4rem;
     border-radius: 8px;
   }
 
   .questionHeader {
-    padding: 0.4rem;
-    margin-bottom: 0.4rem;
-    min-height: 60px; /* REDUCIDO aún más */
+    padding: 0.3rem;
+    margin-bottom: 0.3rem;
+    min-height: 50px;
   }
 
   .questionTitle {
-    font-size: 0.95rem; /* REDUCIDO */
-    min-height: 20px; /* REDUCIDO */
-    padding: 0 0.5rem;
+    font-size: 0.9rem;
+    min-height: 18px;
+    padding: 0 0.4rem;
   }
 
   .questionMeta {
-    flex-direction: column;
-    gap: 0.25rem; /* REDUCIDO */
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.2rem;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .timeIndicator {
-    font-size: 0.7rem; /* REDUCIDO */
-    padding: 0.2rem 0.4rem; /* REDUCIDO */
-    align-self: center;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.3rem;
+    flex-shrink: 0;
   }
 
   .progressIndicator {
-    font-size: 0.65rem; /* REDUCIDO */
-    min-width: auto;
+    font-size: 0.6rem;
+    flex: 1;
+    min-width: 80px;
   }
 
   .questionCount {
-    font-size: 0.65rem; /* REDUCIDO */
-    padding: 0.2rem 0.4rem; /* REDUCIDO */
-    align-self: center;
+    font-size: 0.6rem;
+    padding: 0.15rem 0.3rem;
+    flex-shrink: 0;
   }
 
   .characterBadge {
-    padding: 0.2rem 0.4rem; /* REDUCIDO */
-    gap: 2px; /* REDUCIDO */
-    align-self: center;
+    padding: 0.15rem 0.3rem;
+    gap: 2px;
+    order: -1;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 0.2rem;
   }
 
   .characterAvatar {
-    width: 18px; /* REDUCIDO */
-    height: 18px; /* REDUCIDO */
+    width: 16px;
+    height: 16px;
   }
 
   .characterName {
-    font-size: 0.55rem; /* REDUCIDO */
+    font-size: 0.5rem;
   }
 
   .characterSpecialty {
-    font-size: 0.45rem; /* REDUCIDO */
+    font-size: 0.4rem;
   }
 
-  /* LAYOUT MÓVIL: Rombo arriba, controles abajo */
+  /* LAYOUT MÓVIL: Vertical optimizado */
   .gameLayout {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    gap: 0.3rem; /* REDUCIDO */
+    grid-template-rows: minmax(160px, 35%) 1fr;
+    gap: 0.3rem;
+    height: 100%;
   }
 
   .previewSection {
-    padding: 0.4rem;
-    min-height: 180px; /* AUMENTADO MÁS para rombo más grande */
-    max-height: 200px; /* AUMENTADO MÁS para rombo más grande */
-  }
-
-  /* Rombo más grande en móviles */
-  .diamondShape {
-    width: 140px;
-    height: 140px;
-    border-width: 3px;
-  }
-
-  .diamondContent {
-    max-width: 90px;
-    padding: 0.6rem;
-  }
-
-  .diamondTitle {
-    font-size: 0.9rem;
-    margin-bottom: 0.3rem;
-  }
-
-  .diamondSubtitle {
-    font-size: 0.8rem;
+    padding: 0.3rem;
+    min-height: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .controlsSection {
-    gap: 0; /* SIN GAP */
-    min-height: 0;
+    gap: 0.2rem;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .controlCard {
-    padding: 0.4rem;
-    flex: 1;
-    margin-bottom: 0.3rem; /* REDUCIDO */
+    padding: 0.3rem;
+    flex-shrink: 0;
+    margin-bottom: 0.2rem;
+    min-height: 120px;
   }
 
   .controlCard:last-of-type {
-    margin-bottom: 0; /* Último card sin margen */
+    margin-bottom: 0;
   }
 
   .summarySection {
-    padding: 0.4rem;
-    margin-bottom: 0.3rem; /* REDUCIDO */
+    padding: 0.3rem;
+    margin-bottom: 0.2rem;
   }
 
   .summaryGrid {
     grid-template-columns: 1fr;
-    gap: 0.2rem; /* REDUCIDO */
+    gap: 0.15rem;
   }
 
   .summaryItem {
-    padding: 0.3rem;
+    padding: 0.25rem;
     flex-direction: row;
     justify-content: space-between;
     text-align: left;
@@ -810,156 +802,171 @@
 
   .submitSection {
     padding-top: 0;
-    margin-top: 0; /* SIN MARGEN */
+    margin-top: 0;
+    flex-shrink: 0;
   }
 
   .submitButton {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    min-height: 36px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    min-height: 40px;
   }
 
   .waitingCard {
-    padding: 0.75rem;
-    min-height: 100px;
+    padding: 0.6rem;
+    min-height: 120px;
   }
 
   .waitingContent h3 {
-    font-size: 0.9rem;
-  }
-
-  .waitingContent p {
-    font-size: 0.75rem;
-  }
-}
-
-/* Móviles pequeños */
-@media (max-width: 480px) {
-  .gameWrapper {
-    /* CORREGIDO: Aún más padding-top para móviles pequeños */
-    padding: 130px 0.2rem 0.2rem 0.2rem;
-  }
-  
-  .gameContainer {
-    min-height: calc(100vh - 130px);
-  }
-  
-  .questionTitle {
-    font-size: 0.9rem;
-  }
-
-  .questionHeader {
-    min-height: 55px; /* MUY REDUCIDO */
-  }
-
-  .previewSection {
-    min-height: 170px; /* AUMENTADO para rombo más grande */
-    max-height: 190px; /* AUMENTADO para rombo más grande */
-  }
-
-  /* Rombo mediano en móviles pequeños */
-  .diamondShape {
-    width: 130px;
-    height: 130px;
-  }
-
-  .diamondContent {
-    max-width: 85px;
-  }
-
-  .diamondTitle {
     font-size: 0.85rem;
   }
 
-  .diamondSubtitle {
-    font-size: 0.75rem;
-  }
-
-  .sectionTitle {
-    font-size: 0.7rem; /* REDUCIDO */
-    margin-bottom: 0.3rem; /* REDUCIDO */
-  }
-}
-
-/* Móviles muy pequeños */
-@media (max-width: 360px) {
-  .gameWrapper {
-    padding: 140px 0.1rem 0.1rem 0.1rem; /* MÁXIMO padding-top */
-  }
-  
-  .gameContainer {
-    min-height: calc(100vh - 140px);
-  }
-  
-  .questionTitle {
-    font-size: 0.8rem;
-    min-height: 18px;
-  }
-
-  .questionHeader {
-    min-height: 50px; /* MÍNIMO */
-  }
-
-  .previewSection {
-    min-height: 160px; /* AUMENTADO para rombo más grande */
-    max-height: 180px; /* AUMENTADO para rombo más grande */
-  }
-
-  /* Rombo compacto pero legible en móviles muy pequeños */
-  .diamondShape {
-    width: 120px;
-    height: 120px;
-  }
-
-  .diamondContent {
-    max-width: 80px;
-  }
-
-  .diamondTitle {
-    font-size: 0.8rem;
-  }
-
-  .diamondSubtitle {
+  .waitingContent p {
     font-size: 0.7rem;
   }
 }
 
-/* Landscape móviles - Header más compacto */
-@media (max-width: 767px) and (orientation: landscape) {
+/* Móviles pequeños - OPTIMIZADO */
+@media (max-width: 480px) {
   .gameWrapper {
-    /* CORREGIDO: Padding-top reducido para landscape */
-    padding: 70px 0.25rem 0.25rem 0.25rem;
+    /* OPTIMIZADO: Padding ajustado a header de 45px */
+    padding: 55px 0.2rem 0.2rem 0.2rem;
   }
   
   .gameContainer {
-    min-height: calc(100vh - 70px);
-  }
-  
-  .questionHeader {
-    min-height: 40px; /* MUY COMPACTO en landscape */
+    min-height: calc(100vh - 55px);
     padding: 0.3rem;
   }
   
   .questionTitle {
-    font-size: 0.75rem; /* MUY PEQUEÑO */
-    min-height: 15px;
+    font-size: 0.85rem;
+  }
+
+  .questionHeader {
+    min-height: 45px;
+    padding: 0.25rem;
+  }
+
+  .previewSection {
+    min-height: 140px;
+    padding: 0.25rem;
+  }
+
+  .controlCard {
+    min-height: 100px;
+    padding: 0.25rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.65rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .submitButton {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    min-height: 36px;
+  }
+}
+
+/* Móviles muy pequeños - OPTIMIZADO */
+@media (max-width: 360px) {
+  .gameWrapper {
+    padding: 50px 0.15rem 0.15rem 0.15rem;
+  }
+  
+  .gameContainer {
+    min-height: calc(100vh - 50px);
+    padding: 0.25rem;
+  }
+  
+  .questionTitle {
+    font-size: 0.75rem;
+    min-height: 16px;
+  }
+
+  .questionHeader {
+    min-height: 40px;
+    padding: 0.2rem;
+  }
+
+  .previewSection {
+    min-height: 120px;
+    padding: 0.2rem;
+  }
+
+  .controlCard {
+    min-height: 90px;
+    padding: 0.2rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.6rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .submitButton {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    min-height: 32px;
+  }
+}
+
+/* Landscape móviles - OPTIMIZADO: Layout horizontal eficiente */
+@media (max-width: 767px) and (orientation: landscape) {
+  .gameWrapper {
+    /* OPTIMIZADO: Padding ajustado a header landscape de 40px */
+    padding: 50px 0.25rem 0.25rem 0.25rem;
+  }
+  
+  .gameContainer {
+    min-height: calc(100vh - 50px);
+    padding: 0.3rem;
+  }
+  
+  .questionHeader {
+    min-height: 35px;
+    padding: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .questionTitle {
+    font-size: 0.7rem;
+    min-height: 14px;
   }
   
   .questionMeta {
     flex-direction: row;
-    gap: 0.3rem;
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+  }
+
+  .characterBadge {
+    order: 0;
+    width: auto;
+    margin-bottom: 0;
   }
   
-  /* En landscape mantener lado a lado */
+  /* En landscape mantener lado a lado con mejor proporción */
   .gameLayout {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.2fr;
     grid-template-rows: 1fr;
-    gap: 0.3rem;
+    gap: 0.25rem;
   }
   
   .previewSection {
-    min-height: auto;
-    max-height: none;
+    min-height: 120px;
+    padding: 0.25rem;
+  }
+
+  .controlsSection {
+    gap: 0.15rem;
+  }
+
+  .controlCard {
+    min-height: 80px;
+    padding: 0.25rem;
+    margin-bottom: 0.15rem;
   }
 }
 

@@ -22,3 +22,15 @@ export const disconnectSocket = () => {
     console.log("Socket desconectado");
   }
 };
+
+/**
+ * Función para salir limpiamente de un juego
+ * @param {string} pin - PIN del juego
+ * @param {string} username - Nombre del usuario
+ */
+export const leaveGameCleanly = (pin, username) => {
+  if (socket.connected && pin && username) {
+    socket.emit("leave-game", { pin, username });
+    console.log(`Usuario ${username} salió limpiamente del juego ${pin}`);
+  }
+};

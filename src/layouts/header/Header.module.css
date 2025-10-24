@@ -188,129 +188,19 @@
 
 @media (max-width: 768px) {
   .header {
-    padding: 10px 20px;
-    flex-wrap: wrap;
-    height: auto;
-    min-height: 60px;
-    gap: 8px;
-  }
-
-  .logoSection {
-    order: 1;
-    gap: 10px;
-  }
-
-  .headerTitle {
-    font-size: 16px;
-  }
-
-  .headerLogo {
-    width: 35px;
-    height: 35px;
-  }
-
-  .createGameBtn {
-    order: 3;
-    padding: 8px 16px;
-    font-size: 12px;
-    gap: 4px;
-  }
-
-  .characterDisplay {
-    order: 2;
-    margin: 0 5px;
-    padding: 4px 8px;
-    gap: 6px;
-    max-width: 150px;
-  }
-
-  .characterAvatar {
-    width: 30px;
-    height: 30px;
-  }
-
-  .characterName {
-    font-size: 10px;
-  }
-
-  .characterSpecialty {
-    font-size: 7px;
-  }
-
-  .timer {
-    order: 4;
-    font-size: 1rem;
-    padding: 6px 12px;
-    margin-top: 5px;
-    align-self: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .header {
     padding: 8px 15px;
-    flex-direction: column;
-    align-items: center;
-    height: auto;
-    min-height: auto;
+    flex-wrap: nowrap;
+    height: 50px;
+    min-height: 50px;
     gap: 6px;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .logoSection {
     order: 1;
-    justify-content: center;
-  }
-
-  .headerTitle {
-    font-size: 15px;
-  }
-
-  .headerLogo {
-    width: 30px;
-    height: 30px;
-  }
-
-  .characterDisplay {
-    order: 2;
-    margin: 0;
-    padding: 4px 8px;
-    gap: 6px;
-    max-width: 160px;
-  }
-
-  .characterAvatar {
-    width: 28px;
-    height: 28px;
-  }
-
-  .characterName {
-    font-size: 9px;
-  }
-
-  .characterSpecialty {
-    font-size: 7px;
-  }
-
-  .timer {
-    order: 3;
-    font-size: 0.9rem;
-    padding: 6px 12px;
-    margin: 2px 0;
-  }
-
-  .createGameBtn {
-    order: 4;
-    padding: 6px 12px;
-    font-size: 11px;
-    width: auto;
-    margin-top: 2px;
-  }
-}
-
-@media (max-width: 360px) {
-  .header {
-    padding: 6px 12px;
-    gap: 4px;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .headerTitle {
@@ -318,19 +208,89 @@
   }
 
   .headerLogo {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .createGameBtn {
+    order: 4;
+    padding: 6px 12px;
+    font-size: 11px;
+    gap: 3px;
+    flex-shrink: 0;
   }
 
   .characterDisplay {
+    order: 2;
+    margin: 0;
     padding: 3px 6px;
     gap: 4px;
-    max-width: 140px;
+    max-width: 120px;
+    flex: 1;
+    min-width: 0;
   }
 
   .characterAvatar {
     width: 25px;
     height: 25px;
+  }
+
+  .characterName {
+    font-size: 9px;
+  }
+
+  .characterSpecialty {
+    font-size: 6px;
+  }
+
+  .timer {
+    order: 3;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    margin: 0;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 6px 12px;
+    flex-direction: row;
+    align-items: center;
+    height: 45px;
+    min-height: 45px;
+    gap: 4px;
+    justify-content: space-between;
+  }
+
+  .logoSection {
+    order: 1;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .headerTitle {
+    font-size: 13px;
+  }
+
+  .headerLogo {
+    width: 25px;
+    height: 25px;
+  }
+
+  .characterDisplay {
+    order: 2;
+    margin: 0;
+    padding: 2px 4px;
+    gap: 3px;
+    max-width: 100px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .characterAvatar {
+    width: 22px;
+    height: 22px;
   }
 
   .characterName {
@@ -342,13 +302,67 @@
   }
 
   .timer {
-    font-size: 0.85rem;
-    padding: 5px 10px;
+    order: 3;
+    font-size: 0.8rem;
+    padding: 3px 6px;
+    margin: 0;
+    flex-shrink: 0;
   }
 
   .createGameBtn {
-    padding: 5px 10px;
+    order: 4;
+    padding: 4px 8px;
     font-size: 10px;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .header {
+    padding: 5px 10px;
+    gap: 3px;
+    height: 40px;
+    min-height: 40px;
+  }
+
+  .headerTitle {
+    font-size: 12px;
+  }
+
+  .headerLogo {
+    width: 22px;
+    height: 22px;
+  }
+
+  .characterDisplay {
+    padding: 2px 4px;
+    gap: 2px;
+    max-width: 80px;
+  }
+
+  .characterAvatar {
+    width: 20px;
+    height: 20px;
+  }
+
+  .characterName {
+    font-size: 7px;
+  }
+
+  .characterSpecialty {
+    font-size: 5px;
+  }
+
+  .timer {
+    font-size: 0.75rem;
+    padding: 2px 4px;
+  }
+
+  .createGameBtn {
+    padding: 3px 6px;
+    font-size: 9px;
+    gap: 1px;
   }
 }
 
@@ -384,61 +398,63 @@
 /* Orientación landscape específica para móviles */
 @media (max-width: 768px) and (orientation: landscape) {
   .header {
-    padding: 6px 15px;
+    padding: 4px 12px;
     flex-direction: row;
-    height: 50px;
-    min-height: 50px;
+    height: 40px;
+    min-height: 40px;
     flex-wrap: nowrap;
-    gap: 5px;
+    gap: 4px;
   }
 
   .logoSection {
     order: 1;
     flex: 0 0 auto;
+    gap: 4px;
   }
 
   .headerTitle {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .headerLogo {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
   }
 
   .characterDisplay {
     order: 2;
     flex: 1;
-    margin: 0 5px;
-    padding: 3px 6px;
-    max-width: 120px;
+    margin: 0 3px;
+    padding: 2px 4px;
+    max-width: 100px;
+    gap: 2px;
   }
 
   .characterAvatar {
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
   }
 
   .characterName {
-    font-size: 8px;
+    font-size: 7px;
   }
 
   .characterSpecialty {
-    font-size: 6px;
+    font-size: 5px;
   }
 
   .timer {
     order: 3;
-    font-size: 0.8rem;
-    padding: 4px 8px;
+    font-size: 0.7rem;
+    padding: 2px 4px;
     margin: 0;
   }
 
   .createGameBtn {
     order: 4;
-    padding: 4px 8px;
-    font-size: 10px;
-    gap: 2px;
+    padding: 3px 6px;
+    font-size: 9px;
+    gap: 1px;
   }
 }
 

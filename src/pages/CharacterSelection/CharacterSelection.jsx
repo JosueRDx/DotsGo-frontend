@@ -191,7 +191,20 @@ export default function CharacterSelection() {
           navigate("/waiting-room");
         }
       } else {
-        setError(response.error || "Error al unirse al juego");
+        // MEJORADO: Manejo específico de errores de nombres duplicados
+        const errorMessage = response.error || "Error al unirse al juego";
+        
+        if (errorMessage.includes("Ya existe un jugador con ese nombre")) {
+          setError("⚠️ Nombre ya en uso. Alguien más ya está usando este nombre en la sala. Por favor, vuelve atrás y elige otro nombre.");
+        } else if (errorMessage.includes("Juego no encontrado")) {
+          setError("❌ Sala no encontrada. Verifica que el PIN sea correcto.");
+        } else if (errorMessage.includes("ya ha finalizado")) {
+          setError("🏁 Esta partida ya ha terminado. Busca una nueva sala para jugar.");
+        } else {
+          setError(`❌ ${errorMessage}`);
+        }
+        
+        console.error("Error al unirse al juego:", errorMessage);
       }
     });
   };
@@ -342,8 +355,19 @@ export default function CharacterSelection() {
         {/* Error Message */}
         {error && (
           <div className={styles.errorMessage}>
-            <span>⚠️</span>
-            {error}
+            <div className={styles.errorContent}>
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
+            {error.includes("Nombre ya en uso") && (
+              <button 
+                className={styles.changeNameButton}
+                onClick={goBack}
+              >
+                <ArrowLeft size={16} />
+                Cambiar Nombre
+              </button>
+            )}
           </div>
         )}
       </main>

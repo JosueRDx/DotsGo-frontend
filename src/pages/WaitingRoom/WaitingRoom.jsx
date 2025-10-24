@@ -69,6 +69,19 @@ export default function WaitingRoom() {
             if (!response?.success) {
               console.error("Error al reingresar al juego:", response?.error);
               rejoinAttemptedRef.current = false;
+              
+              // MEJORADO: Manejo específico de nombres duplicados
+              if (response?.error?.includes("Ya existe un jugador con ese nombre")) {
+                alert("⚠️ Nombre ya en uso. Alguien más está usando tu nombre en esta sala. Serás redirigido para elegir otro nombre.");
+                // Limpiar datos y redirigir
+                localStorage.removeItem("username");
+                localStorage.removeItem("selectedCharacter");
+                navigate("/join");
+              } else if (response?.error?.includes("Juego no encontrado")) {
+                alert("❌ La sala ya no existe. Serás redirigido al inicio.");
+                localStorage.removeItem("gamePin");
+                navigate("/");
+              }
             }
           }
         );

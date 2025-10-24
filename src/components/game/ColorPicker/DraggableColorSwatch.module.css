@@ -75,31 +75,35 @@
   }
 }
 
-/* Móviles en vertical */
+/* Móviles en vertical - Tamaño táctil optimizado */
 @media (max-width: 767px) and (orientation: portrait) {
   .colorSwatch {
-    max-width: 70px;
-    height: 80px;
-    font-size: 0.65rem;
-    padding: 4px;
+    max-width: 65px;
+    height: 75px;
+    font-size: 0.6rem;
+    padding: 3px;
     border-radius: 6px;
-    background-size: 12px 12px;
+    background-size: 11px 11px;
+    min-height: 44px;
+    min-width: 44px;
   }
   
   .colorSwatch:hover {
-    transform: translateY(-1px) scale(1.01);
+    transform: translateY(-1px) scale(1.02);
   }
 }
 
-/* Móviles en horizontal */
+/* Móviles en horizontal - Compacto pero funcional */
 @media (max-width: 767px) and (orientation: landscape) {
   .colorSwatch {
-    max-width: 60px;
-    height: 65px;
-    font-size: 0.6rem;
-    padding: 3px;
+    max-width: 55px;
+    height: 60px;
+    font-size: 0.55rem;
+    padding: 2px;
     border-radius: 5px;
-    background-size: 10px 10px;
+    background-size: 9px 9px;
+    min-height: 44px;
+    min-width: 44px;
   }
   
   .colorSwatch:hover {
@@ -107,15 +111,17 @@
   }
 }
 
-/* Móviles pequeños */
+/* Móviles pequeños - Equilibrio entre tamaño y usabilidad */
 @media (max-width: 480px) {
   .colorSwatch {
-    max-width: 65px;
-    height: 75px;
-    font-size: 0.6rem;
-    padding: 3px;
+    max-width: 60px;
+    height: 70px;
+    font-size: 0.55rem;
+    padding: 2px;
     border-width: 1px;
-    background-size: 11px 11px;
+    background-size: 10px 10px;
+    min-height: 44px;
+    min-width: 44px;
   }
   
   .colorSwatch:hover {
@@ -124,15 +130,17 @@
   }
 }
 
-/* Móviles muy pequeños */
+/* Móviles muy pequeños - Mínimo funcional */
 @media (max-width: 360px) {
   .colorSwatch {
-    max-width: 55px;
-    height: 65px;
-    font-size: 0.55rem;
+    max-width: 50px;
+    height: 60px;
+    font-size: 0.5rem;
     padding: 2px;
     border-radius: 4px;
-    background-size: 10px 10px;
+    background-size: 9px 9px;
+    min-height: 44px;
+    min-width: 44px;
   }
   
   .colorSwatch:hover {

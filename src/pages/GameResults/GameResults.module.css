@@ -206,6 +206,85 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
+/* No Winner Spotlight */
+.noWinnerSpotlight {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.noWinnerCard {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.1));
+  backdrop-filter: blur(30px);
+  border: 2px solid #ef4444;
+  border-radius: 32px;
+  padding: 40px;
+  text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 25px 50px rgba(239, 68, 68, 0.3),
+    0 0 100px rgba(239, 68, 68, 0.2);
+  max-width: 600px;
+}
+
+.noWinnerCard::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(239, 68, 68, 0.1), transparent);
+  animation: noWinnerShine 4s linear infinite;
+  pointer-events: none;
+}
+
+.noWinnerIcon {
+  color: #ef4444;
+  margin-bottom: 20px;
+  animation: noWinnerFloat 3s ease-in-out infinite;
+}
+
+.noWinnerTitle {
+  font-size: 32px;
+  font-weight: 900;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  color: #ef4444;
+}
+
+.noWinnerSubtitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.noWinnerMessage {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.encouragementStats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.encouragementStats .statItem {
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
 /* Results Section */
 .resultsSection {
   background: rgba(0, 0, 0, 0.4);
@@ -953,5 +1032,74 @@
   50% { 
     transform: translateY(-50px) rotate(180deg); 
     opacity: 0.7;
+  }
+}/* Animac
+iones para Sin Ganador */
+@keyframes noWinnerShine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+@keyframes noWinnerFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+
+/* Responsive para Sin Ganador */
+@media (max-width: 768px) {
+  .noWinnerCard {
+    padding: 30px 20px;
+    margin: 0 10px;
+  }
+  
+  .noWinnerTitle {
+    font-size: 24px;
+  }
+  
+  .noWinnerSubtitle {
+    font-size: 18px;
+  }
+  
+  .noWinnerMessage {
+    font-size: 14px;
+  }
+  
+  .encouragementStats {
+    gap: 8px;
+  }
+  
+  .encouragementStats .statItem {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .noWinnerCard {
+    padding: 25px 15px;
+  }
+  
+  .noWinnerIcon {
+    transform: scale(0.8);
+  }
+  
+  .noWinnerTitle {
+    font-size: 20px;
+  }
+  
+  .noWinnerSubtitle {
+    font-size: 16px;
+  }
+  
+  .encouragementStats {
+    flex-direction: column;
+    gap: 6px;
   }
 }

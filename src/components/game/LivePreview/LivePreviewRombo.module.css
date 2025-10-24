@@ -147,17 +147,46 @@
   }
 }
 
-/* Móviles en vertical - Rombo más pequeño pero completo */
+/* Móviles en vertical - Rombo optimizado y más grande */
 @media (max-width: 767px) and (orientation: portrait) {
   .rombo-container {
-    padding: 0.4rem;
+    padding: 0.3rem;
+    min-height: 140px;
+  }
+  
+  .rombo-outer {
+    width: min(50vw, 200px);
+    height: min(50vw, 200px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .rombo-drop-hint {
+    font-size: 0.65rem;
+    line-height: 1.1;
+  }
+  
+  .rombo-logo {
+    width: 26%;
+    max-height: 26%;
+    filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.4));
+  }
+  
+  .rombo-number {
+    font-size: 1.1rem;
+  }
+}
+
+/* Móviles en horizontal - Rombo eficiente para espacio limitado */
+@media (max-width: 767px) and (orientation: landscape) {
+  .rombo-container {
+    padding: 0.2rem;
     min-height: 100px;
   }
   
   .rombo-outer {
-    width: min(40vw, 160px);
-    height: min(40vw, 160px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    width: min(30vw, 140px);
+    height: min(30vw, 140px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
   }
   
   .rombo-drop-hint {
@@ -168,61 +197,6 @@
   .rombo-logo {
     width: 24%;
     max-height: 24%;
-    filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.3));
-  }
-  
-  .rombo-number {
-    font-size: 1rem;
-  }
-}
-
-/* Móviles en horizontal - Rombo compacto */
-@media (max-width: 767px) and (orientation: landscape) {
-  .rombo-container {
-    padding: 0.3rem;
-    min-height: 80px;
-  }
-  
-  .rombo-outer {
-    width: min(25vw, 120px);
-    height: min(25vw, 120px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-  }
-  
-  .rombo-drop-hint {
-    font-size: 0.55rem;
-    line-height: 0.9;
-  }
-  
-  .rombo-logo {
-    width: 22%;
-    max-height: 22%;
-  }
-  
-  .rombo-number {
-    font-size: 0.9rem;
-  }
-}
-
-/* Móviles pequeños */
-@media (max-width: 480px) {
-  .rombo-container {
-    padding: 0.3rem;
-    min-height: 90px;
-  }
-  
-  .rombo-outer {
-    width: min(38vw, 140px);
-    height: min(38vw, 140px);
-  }
-  
-  .rombo-drop-hint {
-    font-size: 0.55rem;
-  }
-  
-  .rombo-logo {
-    width: 23%;
-    max-height: 23%;
   }
   
   .rombo-number {
@@ -230,29 +204,55 @@
   }
 }
 
-/* Móviles muy pequeños */
-@media (max-width: 360px) {
+/* Móviles pequeños - Rombo bien visible */
+@media (max-width: 480px) {
   .rombo-container {
     padding: 0.25rem;
-    min-height: 80px;
+    min-height: 120px;
   }
   
   .rombo-outer {
-    width: min(35vw, 120px);
-    height: min(35vw, 120px);
+    width: min(45vw, 170px);
+    height: min(45vw, 170px);
   }
   
   .rombo-drop-hint {
-    font-size: 0.5rem;
+    font-size: 0.6rem;
   }
   
   .rombo-logo {
-    width: 22%;
-    max-height: 22%;
+    width: 25%;
+    max-height: 25%;
   }
   
   .rombo-number {
-    font-size: 0.85rem;
+    font-size: 1rem;
+  }
+}
+
+/* Móviles muy pequeños - Rombo compacto pero funcional */
+@media (max-width: 360px) {
+  .rombo-container {
+    padding: 0.2rem;
+    min-height: 100px;
+  }
+  
+  .rombo-outer {
+    width: min(42vw, 150px);
+    height: min(42vw, 150px);
+  }
+  
+  .rombo-drop-hint {
+    font-size: 0.55rem;
+  }
+  
+  .rombo-logo {
+    width: 24%;
+    max-height: 24%;
+  }
+  
+  .rombo-number {
+    font-size: 0.9rem;
   }
 }
 

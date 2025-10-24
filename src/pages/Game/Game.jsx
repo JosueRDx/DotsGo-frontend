@@ -305,12 +305,13 @@ export default function Game() {
       setGameHasStarted(true);
     });
 
-    socket.on("game-ended", ({ results }) => {
+    socket.on("game-ended", ({ results, hasWinner }) => {
       console.log("🏁 Juego terminado, redirigiendo a resultados");
+      console.log("¿Hay ganador?:", hasWinner);
       localStorage.removeItem("selectedCharacter");
       localStorage.removeItem("username");
       localStorage.removeItem("questionsCount");
-      navigate("/game-results", { state: { results } });
+      navigate("/game-results", { state: { results, hasWinner } });
     });
 
     socket.on("game-cancelled", () => {

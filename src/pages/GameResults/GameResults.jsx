@@ -7,7 +7,7 @@ import logo from "../../assets/images/logo.png";
 export default function GameResults() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { results } = location.state || { results: [] };
+  const { results, hasWinner } = location.state || { results: [], hasWinner: true };
   const [animationPhase, setAnimationPhase] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -49,7 +49,7 @@ export default function GameResults() {
     return aTime - bTime;
   });
 
-  const topPlayer = sortedResults[0];
+  const topPlayer = hasWinner ? sortedResults[0] : null;
 
   const calculateAccuracy = (player) => {
     const correct = player?.correctAnswers ?? 0;
@@ -85,7 +85,10 @@ export default function GameResults() {
     const timer2 = setTimeout(() => setAnimationPhase(2), 1500);
     const timer3 = setTimeout(() => {
       setAnimationPhase(3);
-      setShowConfetti(true);
+      // Solo mostrar confetti si hay ganador
+      if (hasWinner) {
+        setShowConfetti(true);
+      }
     }, 2500);
 
     return () => {
@@ -165,7 +168,7 @@ export default function GameResults() {
       {/* Main Content */}
       <main className={styles.mainContent}>
         {/* Winner Spotlight */}
-        {topPlayer && animationPhase >= 1 && (
+        {topPlayer && hasWinner && animationPhase >= 1 && (
           <div className={`${styles.winnerSpotlight} ${styles.animated}`}>
             <div className={styles.winnerCard}>
               <div className={styles.winnerCrown}>
@@ -201,6 +204,40 @@ export default function GameResults() {
                   <div className={styles.statItem}>
                     <Zap size={16} />
                     <span>{Math.round(calculateAccuracy(topPlayer))}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* No Winner Section */}
+        {!hasWinner && animationPhase >= 1 && (
+          <div className={`${styles.noWinnerSpotlight} ${styles.animated}`}>
+            <div className={styles.noWinnerCard}>
+              <div className={styles.noWinnerIcon}>
+                <XCircle size={64} />
+              </div>
+              
+              <div className={styles.noWinnerInfo}>
+                <h2 className={styles.noWinnerTitle}>🤔 Sin Ganador</h2>
+                <h3 className={styles.noWinnerSubtitle}>Nadie respondió correctamente</h3>
+                <p className={styles.noWinnerMessage}>
+                  ¡No te preocupes! Los pictogramas pueden ser complicados. 
+                  ¡Sigue practicando y la próxima vez lo harás mejor!
+                </p>
+                <div className={styles.encouragementStats}>
+                  <div className={styles.statItem}>
+                    <Users size={16} />
+                    <span>{totalPlayers} jugadores participaron</span>
+                  </div>
+                  <div className={styles.statItem}>
+                    <Target size={16} />
+                    <span>{totalQuestions} preguntas respondidas</span>
+                  </div>
+                  <div className={styles.statItem}>
+                    <Zap size={16} />
+                    <span>¡Todos aprendieron algo nuevo!</span>
                   </div>
                 </div>
               </div>

@@ -49,6 +49,7 @@ export default function Admin() {
   const [playerRankings, setPlayerRankings] = useState([]);
   const [showRanking, setShowRanking] = useState(false);
   const [players, setPlayers] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   const navigate = useNavigate();
 
@@ -146,11 +147,12 @@ export default function Admin() {
       setTotalQuestions(data.totalQuestions);
     });
 
-    const handleGameEnded = ({ results }) => {
+    const handleGameEnded = ({ results, hasWinner }) => {
       console.log("Resultados finales recibidos en Admin:", results);
+      console.log("¿Hay ganador?:", hasWinner);
       setEsperandoResultados(false);
       resetGame();
-      navigate("/game-results", { state: { results } });
+      navigate("/game-results", { state: { results, hasWinner } });
     };
 
     const restoreSavedGame = () => {
@@ -264,6 +266,27 @@ export default function Admin() {
       }
     });
 
+    // NUEVO: Escuchar intentos de nombres duplicados
+    socket.on("duplicate-name-attempt", (data) => {
+      console.log("⚠️ Intento de nombre duplicado:", data);
+      
+      // Agregar notificación al estado
+      const newNotification = {
+        id: Date.now(),
+        type: 'warning',
+        title: 'Nombre Duplicado',
+        message: `Intento de usar "${data.attemptedName}" (ya existe: "${data.existingName}")`,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      
+      setNotifications(prev => [...prev, newNotification]);
+      
+      // Remover automáticamente después de 5 segundos
+      setTimeout(() => {
+        setNotifications(prev => prev.filter(n => n.id !== newNotification.id));
+      }, 5000);
+    });
+
 
     return () => {
       socket.off("player-joined", handlePlayerJoined);
@@ -273,6 +296,7 @@ export default function Admin() {
       socket.off("players-updated", handlePlayersUpdated);
       socket.off("game-started");
       socket.off("ranking-updated");
+      socket.off("duplicate-name-attempt");
       disconnectSocket();
     };
   }, [navigate, resetGame, saveGameState]);
@@ -742,6 +766,31 @@ export default function Admin() {
 
   return (
     <div className={styles.adminPanel}>
+      {/* Notifications */}
+      {notifications.length > 0 && (
+        <div className={styles.notificationsContainer}>
+          {notifications.map((notification) => (
+            <div 
+              key={notification.id} 
+              className={`${styles.notification} ${styles[notification.type]}`}
+            >
+              <div className={styles.notificationHeader}>
+                <span className={styles.notificationIcon}>⚠️</span>
+                <span className={styles.notificationTitle}>{notification.title}</span>
+                <button 
+                  className={styles.notificationClose}
+                  onClick={() => setNotifications(prev => prev.filter(n => n.id !== notification.id))}
+                >
+                  ×
+                </button>
+              </div>
+              <div className={styles.notificationMessage}>{notification.message}</div>
+              <div className={styles.notificationTime}>{notification.timestamp}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Mobile Header */}
       {isMobile && (
         <div className={styles.mobileHeader}>

@@ -1,5 +1,32 @@
-export const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-export const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || 'http://localhost:5173';
+// Función para obtener la URL base dinámicamente
+const getDynamicBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname, port } = window.location;
+    // Si estamos en desarrollo local, usar el puerto por defecto
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `${protocol}//${hostname}:5173`;
+    }
+    // En producción, usar la URL actual sin puerto específico
+    return `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+  }
+  return 'http://localhost:5173';
+};
+
+const getDynamicApiUrl = () => {
+  if (typeof window !== 'undefined') {
+    const { protocol, hostname } = window.location;
+    // Si estamos en desarrollo local, usar el puerto del backend
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `${protocol}//${hostname}:5000`;
+    }
+    // En producción, asumir que el API está en el mismo dominio con /api
+    return `${protocol}//${hostname}/api`;
+  }
+  return 'http://localhost:5000';
+};
+
+export const API_URL = import.meta.env.VITE_BACKEND_URL || getDynamicApiUrl();
+export const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || getDynamicBaseUrl();
 
 export const MENU_ITEMS = [
   { id: 'my_games', label: 'Mis Juegos', icon: '🎮' },
