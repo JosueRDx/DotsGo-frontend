@@ -210,10 +210,9 @@
 
 .symbolContainer {
   position: absolute;
-  top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   z-index: 2;
+  /* top y transform se definen inline según symbolPosition */
 }
 
 .symbolImage {
@@ -224,8 +223,6 @@
 
 .numberContainer {
   position: absolute;
-  bottom: -10px;
-  right: -10px;
   background: #1f2937;
   border: 2px solid #10b981;
   border-radius: 50%;
@@ -235,6 +232,7 @@
   align-items: center;
   justify-content: center;
   z-index: 3;
+  /* top/bottom y right se definen inline según numberPosition */
 }
 
 .numberText {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, Clock, Users, Target } from 'lucide-react';
 import styles from './CorrectAnswersDisplay.module.css';
+import { availableSymbols } from '../Designer/pictogramData';
 
 /**
  * Componente para mostrar las respuestas correctas después de cada pregunta
@@ -34,13 +35,18 @@ export default function CorrectAnswersDisplay({
     return () => clearInterval(interval);
   }, [isVisible, displayTime, onClose]);
 
+  console.log("🎭 CorrectAnswersDisplay render - isVisible:", isVisible, "playerAnswers:", playerAnswers);
+
   if (!isVisible || !playerAnswers || playerAnswers.length === 0) {
+    console.log("🎭 CorrectAnswersDisplay no se muestra - isVisible:", isVisible, "playerAnswers length:", playerAnswers?.length);
     return null;
   }
 
   // Función para renderizar el pictograma correcto
   const renderCorrectPictogram = (correctAnswer) => {
-    const { pictogram, colors, number } = correctAnswer;
+    const { pictogram, colors, number, symbolPosition, numberPosition } = correctAnswer;
+    
+    console.log("🎨 Renderizando pictograma:", { pictogram, colors, number, symbolPosition, numberPosition });
 
     return (
       <div className={styles.pictogramPreview}>
@@ -64,21 +70,43 @@ export default function CorrectAnswersDisplay({
           />
           
           {/* Símbolo */}
-          {pictogram && pictogram !== 'no_symbol' && (
-            <div className={styles.symbolContainer}>
-              {getSymbolImage(pictogram) && (
+          {pictogram && pictogram !== 'no_symbol' && (() => {
+            const symbolImageSrc = getSymbolImage(pictogram);
+            console.log("🖼️ Imagen del símbolo obtenida:", symbolImageSrc);
+            
+            return symbolImageSrc ? (
+              <div 
+                className={styles.symbolContainer}
+                style={{
+                  top: symbolPosition === 'top' ? '25%' : symbolPosition === 'bottom' ? '65%' : '50%',
+                  transform: 'translate(-50%, -50%)'
+                }}
+              >
                 <img 
-                  src={getSymbolImage(pictogram)} 
+                  src={symbolImageSrc} 
                   alt={pictogram}
                   className={styles.symbolImage}
+                  onError={(e) => {
+                    console.error("❌ Error cargando imagen del símbolo:", e.target.src);
+                  }}
+                  onLoad={() => {
+                    console.log("✅ Imagen del símbolo cargada correctamente");
+                  }}
                 />
-              )}
-            </div>
-          )}
+              </div>
+            ) : null;
+          })()}
           
           {/* Número */}
           {number && (
-            <div className={styles.numberContainer}>
+            <div 
+              className={styles.numberContainer}
+              style={{
+                top: numberPosition === 'top' ? '10%' : 'auto',
+                bottom: numberPosition === 'bottom' ? '10%' : 'auto',
+                right: '10%'
+              }}
+            >
               <span className={styles.numberText}>{number}</span>
             </div>
           )}
@@ -89,38 +117,66 @@ export default function CorrectAnswersDisplay({
 
   // Función auxiliar para obtener el valor del color
   const getColorValue = (colorName) => {
+    if (!colorName) return '#6B7280';
+    
+    const normalizedColor = colorName.toLowerCase().trim();
+    
     const colorMap = {
       'rojo': '#DC2626',
-      'azul': '#2563EB', 
+      'red': '#DC2626',
+      'azul': '#2563EB',
+      'blue': '#2563EB', 
       'amarillo': '#FACC15',
+      'yellow': '#FACC15',
       'verde': '#16A34A',
+      'green': '#16A34A',
       'naranja': '#FF9900',
+      'orange': '#FF9900',
       'blanco': '#FFFFFF',
-      'negro': '#000000'
+      'white': '#FFFFFF',
+      'negro': '#000000',
+      'black': '#000000'
     };
-    return colorMap[colorName?.toLowerCase()] || '#6B7280';
+    
+    console.log("🎨 Obteniendo color para:", colorName, "→", colorMap[normalizedColor] || '#6B7280');
+    return colorMap[normalizedColor] || '#6B7280';
   };
 
   // Función auxiliar para obtener patrones
   const getPatternStyle = (colorName) => {
-    if (colorName?.includes('rayas negras')) {
-      return 'repeating-linear-gradient(90deg, #000000 0 25px, #FFFFFF 25px 50px)';
+    if (!colorName) return null;
+    
+    const normalizedColor = colorName.toLowerCase();
+    
+    if (normalizedColor.includes('rayas negras') || normalizedColor.includes('black_stripes')) {
+      return 'repeating-linear-gradient(90deg, #000000 0px, #000000 12px, #FFFFFF 12px, #FFFFFF 24px)';
     }
-    if (colorName?.includes('rayas rojas')) {
-      return 'repeating-linear-gradient(90deg, #DC2626 0 25px, #FFFFFF 25px 50px)';
+    if (normalizedColor.includes('rayas rojas') || normalizedColor.includes('red_stripes')) {
+      return 'repeating-linear-gradient(90deg, #DC2626 0px, #DC2626 12px, #FFFFFF 12px, #FFFFFF 24px)';
     }
+    
+    console.log("🎨 Patrón para:", colorName, "→", null);
     return null;
   };
 
   // Función auxiliar para obtener la imagen del símbolo
-  const getSymbolImage = (symbolName) => {
-    // Importar dinámicamente las imágenes desde los assets
-    try {
-      return require(`../../../assets/images/pictograms/${symbolName}.svg`);
-    } catch (error) {
-      console.warn(`Símbolo no encontrado: ${symbolName}`);
+  const getSymbolImage = (symbolId) => {
+    console.log("🔍 Buscando símbolo:", symbolId);
+    
+    if (!symbolId || symbolId === 'no_symbol') {
       return null;
     }
+    
+    // Buscar el símbolo en los datos disponibles
+    const symbolData = availableSymbols.find(symbol => symbol.id === symbolId);
+    
+    if (symbolData && symbolData.path) {
+      console.log("✅ Símbolo encontrado:", symbolData.name, "Path:", symbolData.path);
+      return symbolData.path;
+    }
+    
+    console.warn(`⚠️ Símbolo no encontrado: ${symbolId}`);
+    return null;
   };
 
   return (

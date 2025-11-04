@@ -18,6 +18,7 @@ import LivePreviewRombo from "../../components/game/LivePreview/LivePreviewRombo
 import ColorPicker from "../../components/game/ColorPicker/ColorPicker";
 import LogoPicker from "../../components/game/LogoPicker/LogoPicker";
 import NumberPicker from "../../components/game/NumberPicker/NumberPicker";
+import CorrectAnswersDisplay from "../../components/game/CorrectAnswersDisplay/CorrectAnswersDisplay";
 import Header from "../../layouts/header/Header";
 
 export default function Game() {
@@ -57,6 +58,18 @@ export default function Game() {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [progressPercentage, setProgressPercentage] = useState(0);
+
+  // NUEVO: Estados para mostrar respuestas correctas
+  const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
+  const [correctAnswersData, setCorrectAnswersData] = useState(null);
+
+  // NUEVO: Estados para modo aventura
+  const [gameMode, setGameMode] = useState('classic');
+  const [playerLives, setPlayerLives] = useState(3);
+  const [maxLives, setMaxLives] = useState(3);
+  
+  // NUEVO: Estados para modo duelo
+  const [playerPosition, setPlayerPosition] = useState(0);
 
   // Mantener referencia actualizada de si ya se envió la respuesta
   useEffect(() => {
@@ -246,6 +259,15 @@ export default function Game() {
           setQuestionTimeLimit(response.timeLeft || 0);
           setQuestionIndex(response.currentIndex || 1);
           setTotalQuestions(response.totalQuestions || totalQuestions);
+          
+          // NUEVO: Detectar modo de juego desde la respuesta
+          if (response.gameMode) {
+            setGameMode(response.gameMode);
+            console.log("🎮 Modo de juego detectado:", response.gameMode);
+          }
+          if (response.modeConfig && response.modeConfig.maxLives) {
+            setMaxLives(response.modeConfig.maxLives);
+          }
         } else {
           console.log("⚠ No hay pregunta activa en este momento");
           // Mantener gameHasStarted en true pero sin pregunta
@@ -305,13 +327,26 @@ export default function Game() {
       setGameHasStarted(true);
     });
 
-    socket.on("game-ended", ({ results, hasWinner }) => {
+    socket.on("game-ended", ({ results, hasWinner, gameMode: endGameMode, winner, endReason }) => {
       console.log("🏁 Juego terminado, redirigiendo a resultados");
       console.log("¿Hay ganador?:", hasWinner);
+      console.log("Modo de juego:", endGameMode);
+      console.log("Ganador:", winner);
+      console.log("Razón de fin:", endReason);
+      
       localStorage.removeItem("selectedCharacter");
       localStorage.removeItem("username");
       localStorage.removeItem("questionsCount");
-      navigate("/game-results", { state: { results, hasWinner } });
+      
+      navigate("/game-results", { 
+        state: { 
+          results, 
+          hasWinner,
+          gameMode: endGameMode || gameMode,
+          winner,
+          endReason
+        } 
+      });
     });
 
     socket.on("game-cancelled", () => {
@@ -336,12 +371,110 @@ export default function Game() {
       }
     });
 
+    // NUEVO: Escuchar actualizaciones de ranking (incluye info de vidas)
+    socket.on("ranking-updated", ({ players, gameMode: mode, modeConfig }) => {
+      if (mode) {
+        setGameMode(mode);
+      }
+      if (modeConfig && modeConfig.maxLives) {
+        setMaxLives(modeConfig.maxLives);
+      }
+      
+      // Encontrar las vidas y posición del jugador actual
+      const currentPlayer = players.find(p => p.id === socketId);
+      if (currentPlayer) {
+        // Actualizar vidas
+        if (typeof currentPlayer.lives === 'number') {
+          const previousLives = playerLives;
+          setPlayerLives(currentPlayer.lives);
+          
+          // Si las vidas disminuyeron, mostrar notificación
+          if (previousLives > currentPlayer.lives && previousLives > 0) {
+            console.log(`💔 Vidas actualizadas: ${previousLives} → ${currentPlayer.lives}`);
+            setSubmissionStatus('life-lost');
+            setTimeout(() => {
+              if (currentPlayer.lives > 0) {
+                setSubmissionStatus(null);
+              }
+            }, 3000);
+          }
+        }
+        
+        // Actualizar posición (para modo duelo)
+        if (typeof currentPlayer.position === 'number') {
+          setPlayerPosition(currentPlayer.position);
+        }
+      }
+    });
+
+    // NUEVO: Escuchar pérdida de vida
+    socket.on("player-life-lost", ({ playerId, livesRemaining }) => {
+      if (playerId === socketId) {
+        setPlayerLives(livesRemaining);
+        console.log(`💔 Perdiste una vida. Vidas restantes: ${livesRemaining}`);
+        
+        // NUEVO: Mostrar notificación visual de pérdida de vida
+        setSubmissionStatus('life-lost');
+        setTimeout(() => {
+          if (livesRemaining > 0) {
+            setSubmissionStatus(null);
+          }
+        }, 3000);
+      }
+    });
+
+    // NUEVO: Escuchar evento para mostrar respuestas correctas
+    socket.on("show-correct-answers", (data) => {
+      console.log("📋 Frontend recibió evento show-correct-answers:", data);
+      console.log("📋 Datos de respuestas correctas:", JSON.stringify(data, null, 2));
+      
+      setCorrectAnswersData(data);
+      setShowCorrectAnswers(true);
+      
+      // Ocultar otros elementos de la interfaz temporalmente
+      setQuestion(null);
+      setTimeLeft(null);
+      
+      // Limpiar estados de envío
+      setIsSubmitting(false);
+      setSubmissionStatus(null);
+      setShowSuccessAnimation(false);
+      
+      console.log("📋 Estado actualizado - showCorrectAnswers:", true);
+    });
+
+    // NUEVO: Escuchar Game Over individual (modo aventura)
+    socket.on("player-game-over", ({ reason, message, gameMode, finalStats }) => {
+      console.log("💀 Game Over recibido:", { reason, message, gameMode, finalStats });
+      
+      // Limpiar datos locales
+      localStorage.removeItem("selectedCharacter");
+      localStorage.removeItem("username");
+      localStorage.removeItem("questionsCount");
+      
+      // Navegar a resultados con datos del jugador eliminado
+      navigate("/game-results", { 
+        state: { 
+          results: [finalStats], 
+          hasWinner: false,
+          gameMode: gameMode,
+          isGameOver: true,
+          gameOverReason: reason,
+          gameOverMessage: message
+        } 
+      });
+    });
+
     return () => {
       socket.off("game-started");
       socket.off("next-question");
       socket.off("game-ended");
       socket.off("game-cancelled");
       socket.off("player-answered");
+      socket.off("show-correct-answers");
+      socket.off("player-game-over");
+      socket.off("ranking-updated");
+      socket.off("player-life-lost");
     };
   }, [navigate]);
 
@@ -471,6 +604,16 @@ export default function Game() {
     return topColor && bottomColor && symbol && !hasSubmitted && !isSubmitting;
   };
 
+  // NUEVO: Función para manejar el cierre de respuestas correctas
+  const handleCloseCorrectAnswers = () => {
+    console.log("🔄 Cerrando respuestas correctas y reseteando estado");
+    setShowCorrectAnswers(false);
+    setCorrectAnswersData(null);
+    
+    // Resetear el estado del juego para la siguiente pregunta
+    resetGameState();
+  };
+
   // Debug info - solo en desarrollo
   if (process.env.NODE_ENV === 'development') {
     console.log('Game State Debug:', {
@@ -544,6 +687,42 @@ export default function Game() {
                   <div className={styles.questionCount}>
                     Pregunta {questionIndex} de {totalQuestions}
                   </div>
+
+                  {/* NUEVO: Indicador de vidas para modo aventura */}
+                  {gameMode === 'adventure' && (
+                    <div className={styles.livesIndicator}>
+                      <span className={styles.livesLabel}>Vidas:</span>
+                      <div className={styles.livesContainer}>
+                        {Array.from({ length: maxLives }, (_, i) => (
+                          <div
+                            key={i}
+                            className={`${styles.lifeHeart} ${
+                              i < playerLives ? styles.lifeActive : styles.lifeInactive
+                            } ${
+                              i === playerLives && submissionStatus === 'life-lost' ? styles.lifeLost : ''
+                            }`}
+                          >
+                            ❤️
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* NUEVO: Indicador de posición para modo duelo */}
+                  {gameMode === 'duel' && (
+                    <div className={styles.duelIndicator}>
+                      <span className={styles.duelLabel}>Posición:</span>
+                      <div className={styles.duelPosition}>
+                        <span className={styles.positionValue}>{playerPosition || 0}</span>
+                        <span className={styles.positionMax}>/ 10</span>
+                      </div>
+                      <div className={styles.duelWarning}>
+                        <span className={styles.warningIcon}>⚠️</span>
+                        <span className={styles.warningText}>¡Eliminatorio!</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -709,6 +888,16 @@ export default function Game() {
                 </div>
               )}
 
+              {submissionStatus === 'life-lost' && (
+                <div className={styles.lifeLostMessage}>
+                  <div className={styles.lifeLostIcon}>💔</div>
+                  <div className={styles.lifeLostText}>
+                    <h3>¡Perdiste una vida!</h3>
+                    <p>Te quedan {playerLives} vida{playerLives !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+              )}
+
               {/* ESTADO: Esperando que el juego inicie por primera vez */}
               {!question && !gameHasStarted && (
                 <div className={styles.waitingCard}>
@@ -736,6 +925,16 @@ export default function Game() {
           </main>
         </div>
       </div>
+
+      {/* NUEVO: Componente para mostrar respuestas correctas */}
+      <CorrectAnswersDisplay
+        isVisible={showCorrectAnswers}
+        roundIndex={correctAnswersData?.roundIndex}
+        totalQuestions={correctAnswersData?.totalQuestions}
+        playerAnswers={correctAnswersData?.playerAnswers}
+        displayTime={correctAnswersData?.displayTime || 5000}
+        onClose={handleCloseCorrectAnswers}
+      />
     </DndProvider>
   );
 }

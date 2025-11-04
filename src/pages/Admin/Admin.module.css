@@ -1682,4 +1682,406 @@ VO: Animaciones para notificaciones de nombres duplicados */
   .notificationMessage {
     font-size: 12px;
   }
+}/* N
+UEVO: Estilos para selección de modo de juego */
+.gameModeSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.gameModeCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.gameModeCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--mode-color, #10b981), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.gameModeCard:hover {
+  border-color: var(--mode-color, #10b981);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.gameModeCard:hover::before {
+  opacity: 0.1;
+}
+
+.gameModeCard.selected {
+  border-color: var(--mode-color, #10b981);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.gameModeCard.selected::before {
+  opacity: 0.15;
+}
+
+.modeIcon {
+  font-size: 32px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.modeInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.modeInfo h4 {
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.modeInfo p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.modeFeatures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.feature {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.modeStats {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Responsive para modos de juego */
+@media (max-width: 768px) {
+  .gameModeCard {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .modeIcon {
+    font-size: 28px;
+  }
+  
+  .modeInfo h4 {
+    font-size: 14px;
+  }
+  
+  .modeInfo p {
+    font-size: 12px;
+  }
+  
+  .feature {
+    font-size: 9px;
+  }
+  
+  .modeStats {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gameModeSelector {
+    gap: 8px;
+  }
+  
+  .gameModeCard {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .modeIcon {
+    font-size: 24px;
+  }
+  
+  .modeFeatures {
+    gap: 2px;
+  }
+  
+  .feature {
+    padding: 1px 4px;
+    font-size: 8px;
+  }
+}/* D
+uel Arena Styles */
+.duelArena {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+  border: 2px solid #ef4444;
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.duelArena h4 {
+  color: #ef4444;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.duelTrack {
+  position: relative;
+  min-height: 200px;
+}
+
+.trackHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.startLine {
+  color: #10b981;
+  font-size: 0.9rem;
+}
+
+.finishLine {
+  color: #f59e0b;
+  font-size: 0.9rem;
+}
+
+.eliminatoryWarning {
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ef4444;
+}
+
+.raceTrack {
+  position: relative;
+  background: linear-gradient(90deg, 
+    #10b981 0%, 
+    #34d399 20%, 
+    #fbbf24 40%, 
+    #f59e0b 60%, 
+    #ef4444 80%, 
+    #dc2626 100%
+  );
+  height: 150px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.positionLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.positionNumber {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+
+.duelPlayer {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid #6366f1;
+  border-radius: 12px;
+  padding: 8px;
+  transition: all 0.5s ease;
+  z-index: 10;
+  min-width: 180px;
+}
+
+.duelPlayer.eliminated {
+  opacity: 0.5;
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.playerAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #6366f1;
+  flex-shrink: 0;
+}
+
+.playerAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.defaultAvatar {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  font-size: 1rem;
+}
+
+.playerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.playerName {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: #1f2937;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playerStats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.position {
+  font-size: 0.7rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.eliminatoryStatus {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid #10b981;
+}
+
+.duelPlayer.eliminated .eliminatoryStatus {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.lifeHeart {
+  font-size: 0.6rem;
+  transition: all 0.3s ease;
+}
+
+.lifeHeart.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.lifeHeart.inactive {
+  opacity: 0.3;
+  transform: scale(0.8);
+  filter: grayscale(100%);
+}
+
+.duelWinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  border: 3px solid #f59e0b;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(245, 158, 11, 0.4);
+  z-index: 20;
+}
+
+.duelWinner h3 {
+  color: #92400e;
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+}
+
+.duelWinner p {
+  color: #78350f;
+  font-size: 0.9rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Responsive para arena de duelo */
+@media (max-width: 768px) {
+  .duelPlayer {
+    min-width: 140px;
+    padding: 6px;
+    gap: 6px;
+  }
+  
+  .playerAvatar {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .playerName {
+    font-size: 0.7rem;
+  }
+  
+  .position {
+    font-size: 0.6rem;
+  }
+  
+  .lifeHeart {
+    font-size: 0.5rem;
+  }
+  
+  .raceTrack {
+    height: 120px;
+  }
 }

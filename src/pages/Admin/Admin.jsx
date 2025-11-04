@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import styles from "./Admin.module.css";
 import logo from "../../assets/images/logo.png";
+import TournamentBracket from "../../components/admin/TournamentBracket/TournamentBracket";
 // Importar imágenes de personajes
 import personaje1 from "../../assets/images/personajes/1.png";
 import personaje2 from "../../assets/images/personajes/2.png";
@@ -43,6 +44,26 @@ export default function Admin() {
   const [esperandoResultados, setEsperandoResultados] = useState(false);
   const [juegoCreado, setJuegoCreado] = useState(false);
   const [questions, setQuestions] = useState([]);
+  
+  // NUEVO: Estado para modo de juego
+  const [selectedGameMode, setSelectedGameMode] = useState("classic");
+  const [adventureLives, setAdventureLives] = useState(3);
+  
+  // NUEVO: Estados para modo duelo
+  const [duelState, setDuelState] = useState({
+    players: [],
+    finishLine: 15,
+    gameEnded: false,
+    winner: null
+  });
+
+  // NUEVO: Estados para modo torneo
+  const [tournamentState, setTournamentState] = useState({
+    bracket: [],
+    currentMatch: null,
+    status: 'waiting', // waiting, active, completed
+    winner: null
+  });
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
@@ -52,6 +73,42 @@ export default function Admin() {
   const [notifications, setNotifications] = useState([]);
 
   const navigate = useNavigate();
+
+  // NUEVO: Configuraciones de modos de juego
+  const gameModes = {
+    classic: {
+      name: 'Modo Clásico',
+      description: 'Responde todas las preguntas y acumula puntos. El jugador con más puntos gana.',
+      icon: '🏆',
+      maxPlayers: 50,
+      features: ['Puntuación por velocidad', 'Todas las preguntas', 'Ranking final'],
+      color: '#10b981'
+    },
+    adventure: {
+      name: 'Modo Aventura',
+      description: 'Escala la montaña con 3 vidas. Cada error te hace perder una vida.',
+      icon: '🏔️',
+      maxPlayers: 20,
+      features: ['3 vidas por jugador', 'Eliminación por vidas', 'Supervivencia'],
+      color: '#f59e0b'
+    },
+    duel: {
+      name: 'Modo Duelo',
+      description: 'Enfrentamiento 1v1 eliminatorio. Un error y estás fuera.',
+      icon: '⚔️',
+      maxPlayers: 2,
+      features: ['Solo 2 jugadores', 'Eliminatorio directo', 'Un error = eliminación'],
+      color: '#ef4444'
+    },
+    tournament: {
+      name: 'Modo Torneo',
+      description: 'Torneo eliminatorio con múltiples jugadores. Bracket automático.',
+      icon: '🏆',
+      maxPlayers: 32,
+      features: ['Múltiples jugadores', 'Bracket automático', 'Eliminación directa'],
+      color: '#8b5cf6'
+    }
+  };
 
   const saveGameState = useCallback((newState) => {
     if (typeof window === "undefined") return;
@@ -258,12 +315,50 @@ export default function Admin() {
         const sortedPlayers = [...updatedPlayers].sort((a, b) => b.score - a.score);
         setPlayerRankings(sortedPlayers);
       }
-      if (data.currentQuestion) {
-        setCurrentQuestion(data.currentQuestion);
-      }
-      if (data.totalQuestions) {
-        setTotalQuestions(data.totalQuestions);
-      }
+    });
+
+    // NUEVO: Event listeners para modo duelo
+    socket.on("duel-state-update", (data) => {
+      console.log("🏁 Actualización de estado del duelo:", data);
+      setDuelState(data);
+    });
+
+    socket.on("duel-position-update", (data) => {
+      console.log("⚔️ Actualización de posición en duelo:", data);
+      // Actualizar el estado local del duelo
+      setDuelState(prev => ({
+        ...prev,
+        players: prev.players.map(p => 
+          p.id === data.playerId 
+            ? { ...p, position: data.position, lives: data.livesRemaining || p.lives }
+            : p
+        )
+      }));
+    });
+
+    // NUEVO: Event listeners para modo torneo
+    socket.on("tournament-state-update", (data) => {
+      console.log("🏆 Actualización de estado del torneo:", data);
+      setTournamentState(data);
+    });
+
+    socket.on("tournament-match-started", (data) => {
+      console.log("⚔️ Match de torneo iniciado:", data);
+      setTournamentState(prev => ({
+        ...prev,
+        currentMatch: data.match,
+        status: 'active'
+      }));
+    });
+
+    socket.on("tournament-match-completed", (data) => {
+      console.log("✅ Match de torneo completado:", data);
+      setTournamentState(prev => ({
+        ...prev,
+        currentMatch: null,
+        bracket: data.bracket,
+        winner: data.tournamentWinner || prev.winner
+      }));
     });
 
     // NUEVO: Escuchar intentos de nombres duplicados
@@ -297,6 +392,11 @@ export default function Admin() {
       socket.off("game-started");
       socket.off("ranking-updated");
       socket.off("duplicate-name-attempt");
+      socket.off("duel-state-update");
+      socket.off("duel-position-update");
+      socket.off("tournament-state-update");
+      socket.off("tournament-match-started");
+      socket.off("tournament-match-completed");
       disconnectSocket();
     };
   }, [navigate, resetGame, saveGameState]);
@@ -381,7 +481,12 @@ export default function Admin() {
 
     socket.emit("create-game", {
       timeLimit: parseInt(tiempoJuego),
-      questionIds: selectedQuestions
+      questionIds: selectedQuestions,
+      gameMode: selectedGameMode, // NUEVO: Incluir modo de juego
+      gameName: nombreJuego,
+      modeConfig: {
+        maxLives: selectedGameMode === 'adventure' ? adventureLives : 3
+      }
     }, (response) => {
       if (response.success) {
         setCodigo(response.pin);
@@ -400,12 +505,40 @@ export default function Admin() {
     setEsperandoResultados(true);
     saveGameState({ esperandoResultados: true });
     setShowRanking(true); // Mostrar el ranking cuando inicia el juego
+    
+    // Para modo torneo, crear el bracket primero
+    if (selectedGameMode === 'tournament') {
+      socket.emit("create-tournament", { pin: codigo }, (response) => {
+        if (response.success) {
+          setTournamentState(response.tournament);
+        } else {
+          alert(response.error || "Error al crear el torneo");
+          setEsperandoResultados(false);
+          saveGameState({ esperandoResultados: false });
+          setShowRanking(false);
+          return;
+        }
+      });
+    }
+    
     socket.emit("start-game", { pin: codigo }, (response) => {
       if (!response.success) {
         setEsperandoResultados(false);
         saveGameState({ esperandoResultados: false });
         setShowRanking(false);
         alert(response.error || "Error al iniciar el juego");
+      }
+    });
+  };
+
+  // NUEVO: Función para iniciar un match del torneo
+  const handleStartTournamentMatch = (match, round) => {
+    socket.emit("start-tournament-match", { 
+      pin: codigo, 
+      matchId: match.id 
+    }, (response) => {
+      if (!response.success) {
+        alert(response.error || "Error al iniciar el match");
       }
     });
   };
@@ -448,6 +581,85 @@ export default function Admin() {
                         onChange={(e) => setNombreJuego(e.target.value)}
                       />
                     </div>
+
+                    {/* NUEVO: Selección de Modo de Juego */}
+                    <div className={styles.formGroup}>
+                      <label>Modo de Juego</label>
+                      <div className={styles.gameModeSelector}>
+                        {Object.entries(gameModes).map(([modeKey, mode]) => (
+                          <div
+                            key={modeKey}
+                            className={`${styles.gameModeCard} ${
+                              selectedGameMode === modeKey ? styles.selected : ''
+                            }`}
+                            onClick={() => setSelectedGameMode(modeKey)}
+                            style={{ '--mode-color': mode.color }}
+                          >
+                            <div className={styles.modeIcon}>{mode.icon}</div>
+                            <div className={styles.modeInfo}>
+                              <h4>{mode.name}</h4>
+                              <p>{mode.description}</p>
+                              <div className={styles.modeFeatures}>
+                                {mode.features.map((feature, index) => (
+                                  <span key={index} className={styles.feature}>
+                                    {feature}
+                                  </span>
+                                ))}
+                              </div>
+                              <div className={styles.modeStats}>
+                                <span>Máx. {mode.maxPlayers} jugadores</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* NUEVO: Configuración específica para Modo Aventura */}
+                    {selectedGameMode === 'adventure' && (
+                      <div className={styles.formGroup}>
+                        <label>Número de Vidas (Modo Aventura)</label>
+                        <div className={styles.livesSelector}>
+                          <button
+                            className={`${styles.livesBtn} ${adventureLives === 1 ? styles.active : ''}`}
+                            onClick={() => setAdventureLives(1)}
+                          >
+                            ❤️ 1 Vida
+                          </button>
+                          <button
+                            className={`${styles.livesBtn} ${adventureLives === 2 ? styles.active : ''}`}
+                            onClick={() => setAdventureLives(2)}
+                          >
+                            ❤️❤️ 2 Vidas
+                          </button>
+                          <button
+                            className={`${styles.livesBtn} ${adventureLives === 3 ? styles.active : ''}`}
+                            onClick={() => setAdventureLives(3)}
+                          >
+                            ❤️❤️❤️ 3 Vidas
+                          </button>
+                          <button
+                            className={`${styles.livesBtn} ${adventureLives === 5 ? styles.active : ''}`}
+                            onClick={() => setAdventureLives(5)}
+                          >
+                            ❤️❤️❤️❤️❤️ 5 Vidas
+                          </button>
+                          <input
+                            type="number"
+                            placeholder="Custom"
+                            value={adventureLives}
+                            onChange={(e) => setAdventureLives(parseInt(e.target.value) || 3)}
+                            min="1"
+                            max="10"
+                            className={styles.customLivesInput}
+                          />
+                        </div>
+                        <p className={styles.livesDescription}>
+                          Cada jugador comenzará con {adventureLives} vida{adventureLives !== 1 ? 's' : ''}. 
+                          Al responder incorrectamente, perderán una vida. Sin vidas = eliminación.
+                        </p>
+                      </div>
+                    )}
 
                     <div className={styles.formGroup}>
                       <label>Tiempo por Pregunta (segundos)</label>
@@ -619,7 +831,74 @@ export default function Admin() {
                   )}
                 </div>
 
-                {showRanking && (
+                {showRanking && selectedGameMode === 'tournament' && (
+                  <TournamentBracket
+                    players={players}
+                    onStartMatch={handleStartTournamentMatch}
+                    currentMatch={tournamentState.currentMatch}
+                    tournamentState={tournamentState}
+                  />
+                )}
+
+                {showRanking && selectedGameMode === 'duel' && (
+                  <div className={styles.duelArena}>
+                    <h4>⚔️ Arena de Duelo</h4>
+                    <div className={styles.duelTrack}>
+                      <div className={styles.trackHeader}>
+                        <span className={styles.startLine}>🏁 INICIO</span>
+                        <span className={styles.finishLine}>🏆 META (Pos. {duelState.finishLine || 10})</span>
+                        <span className={styles.eliminatoryWarning}>⚠️ ELIMINATORIO</span>
+                      </div>
+                      
+                      <div className={styles.raceTrack}>
+                        {/* Líneas de posición */}
+                        {Array.from({ length: (duelState.finishLine || 10) + 1 }, (_, i) => (
+                          <div key={i} className={styles.positionLine} style={{ left: `${(i / (duelState.finishLine || 10)) * 100}%` }}>
+                            <span className={styles.positionNumber}>{i}</span>
+                          </div>
+                        ))}
+                        
+                        {/* Jugadores */}
+                        {duelState.players.map((player, index) => (
+                          <div
+                            key={player.id}
+                            className={`${styles.duelPlayer} ${player.isEliminated ? styles.eliminated : ''}`}
+                            style={{
+                              left: `${Math.min((player.position / (duelState.finishLine || 10)) * 100, 100)}%`,
+                              top: `${20 + (index * 60)}px`
+                            }}
+                          >
+                            <div className={styles.playerAvatar}>
+                              {player.character?.image ? (
+                                <img src={player.character.image} alt={player.character.name} />
+                              ) : (
+                                <div className={styles.defaultAvatar}>👤</div>
+                              )}
+                            </div>
+                            <div className={styles.playerInfo}>
+                              <span className={styles.playerName}>{player.username}</span>
+                              <div className={styles.playerStats}>
+                                <span className={styles.position}>Pos: {player.position}</span>
+                                <span className={styles.eliminatoryStatus}>
+                                  {player.isEliminated ? '💀 ELIMINADO' : '✅ ACTIVO'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {duelState.gameEnded && duelState.winner && (
+                        <div className={styles.duelWinner}>
+                          <h3>🏆 ¡{duelState.winner.username} Ganó el Duelo!</h3>
+                          <p>Tipo de victoria: {duelState.winner.winType === 'race' ? 'Llegó a la meta' : 'Oponente eliminado'}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {showRanking && selectedGameMode !== 'duel' && (
                   <div className={styles.liveRanking}>
                     <h4>🏆 Ranking</h4>
                     <div className={styles.rankingList}>

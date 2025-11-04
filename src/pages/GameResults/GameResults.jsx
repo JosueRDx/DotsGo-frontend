@@ -7,7 +7,19 @@ import logo from "../../assets/images/logo.png";
 export default function GameResults() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { results, hasWinner } = location.state || { results: [], hasWinner: true };
+  const { 
+    results, 
+    hasWinner, 
+    gameMode, 
+    isGameOver, 
+    gameOverReason, 
+    gameOverMessage 
+  } = location.state || { 
+    results: [], 
+    hasWinner: true, 
+    gameMode: 'classic',
+    isGameOver: false 
+  };
   const [animationPhase, setAnimationPhase] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -211,8 +223,54 @@ export default function GameResults() {
           </div>
         )}
 
+        {/* Game Over Individual Section */}
+        {isGameOver && animationPhase >= 1 && (
+          <div className={`${styles.gameOverSpotlight} ${styles.animated}`}>
+            <div className={styles.gameOverCard}>
+              <div className={styles.gameOverIcon}>
+                <XCircle size={64} />
+              </div>
+              
+              <div className={styles.gameOverInfo}>
+                <h2 className={styles.gameOverTitle}>💀 Game Over</h2>
+                <h3 className={styles.gameOverSubtitle}>{gameOverReason}</h3>
+                <p className={styles.gameOverMessage}>
+                  {gameOverMessage || "Has sido eliminado del juego"}
+                </p>
+                {gameMode === 'adventure' && (
+                  <div className={styles.adventureMessage}>
+                    <p>🏔️ En el modo Aventura, cada error cuenta. ¡Inténtalo de nuevo para escalar más alto!</p>
+                  </div>
+                )}
+                <div className={styles.gameOverStats}>
+                  {normalizedResults.length > 0 && (
+                    <>
+                      <div className={styles.statItem}>
+                        <Trophy size={16} />
+                        <span>Puntuación: {normalizedResults[0]?.score || 0}</span>
+                      </div>
+                      <div className={styles.statItem}>
+                        <Target size={16} />
+                        <span>Correctas: {normalizedResults[0]?.correctAnswers || 0}</span>
+                      </div>
+                      <div className={styles.statItem}>
+                        <XCircle size={16} />
+                        <span>Incorrectas: {(normalizedResults[0]?.totalQuestions || 0) - (normalizedResults[0]?.correctAnswers || 0)}</span>
+                      </div>
+                      <div className={styles.statItem}>
+                        <Zap size={16} />
+                        <span>Precisión: {Math.round(calculateAccuracy(normalizedResults[0]))}%</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* No Winner Section */}
-        {!hasWinner && animationPhase >= 1 && (
+        {!hasWinner && !isGameOver && animationPhase >= 1 && (
           <div className={`${styles.noWinnerSpotlight} ${styles.animated}`}>
             <div className={styles.noWinnerCard}>
               <div className={styles.noWinnerIcon}>
