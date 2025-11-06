@@ -19,11 +19,13 @@ export default function CorrectAnswersDisplay({
   useEffect(() => {
     if (!isVisible) return;
 
+    console.log("🎭 CorrectAnswersDisplay iniciando timer de", displayTime / 1000, "segundos");
     setTimeLeft(displayTime / 1000);
 
     const interval = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
+          console.log("🎭 CorrectAnswersDisplay timer terminado, cerrando...");
           clearInterval(interval);
           onClose();
           return 0;
@@ -32,7 +34,10 @@ export default function CorrectAnswersDisplay({
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      console.log("🎭 CorrectAnswersDisplay limpiando timer");
+      clearInterval(interval);
+    };
   }, [isVisible, displayTime, onClose]);
 
   console.log("🎭 CorrectAnswersDisplay render - isVisible:", isVisible, "playerAnswers:", playerAnswers);

@@ -315,11 +315,19 @@ export default function Game() {
     // Escuchar nueva pregunta (para cuando cambie)
     socket.on("game-started", ({ question, timeLimit, currentIndex, totalQuestions: totalQ }) => {
       console.log("🎯 Nueva pregunta recibida via game-started:", question.title);
+      
+      // Cerrar respuestas correctas si están abiertas
+      if (showCorrectAnswers) {
+        setShowCorrectAnswers(false);
+        setCorrectAnswersData(null);
+      }
+      
       if (joiningInProgressRef.current) {
         joiningInProgressRef.current = false;
       } else if (questionRef.current && !hasSubmittedRef.current) {
         handleAutoSubmit();
       }
+      
       resetGameState();
       setQuestion(question);
       setTimeLeft(timeLimit);
@@ -332,11 +340,19 @@ export default function Game() {
     // Escuchar siguiente pregunta
     socket.on("next-question", ({ question, timeLimit, currentIndex, totalQuestions: totalQ }) => {
       console.log("🎯 Siguiente pregunta recibida:", question.title);
+      
+      // Cerrar respuestas correctas si están abiertas
+      if (showCorrectAnswers) {
+        setShowCorrectAnswers(false);
+        setCorrectAnswersData(null);
+      }
+      
       if (joiningInProgressRef.current) {
         joiningInProgressRef.current = false;
       } else if (questionRef.current && !hasSubmittedRef.current) {
         handleAutoSubmit();
       }
+      
       resetGameState();
       setQuestion(question);
       setTimeLeft(timeLimit);
@@ -420,17 +436,11 @@ export default function Game() {
         // Actualizar vidas (solo en modos que las usen)
         if (typeof currentPlayer.lives === 'number') {
           const previousLives = playerLives;
-          setPlayerLives(currentPlayer.lives);
           
-          // Si las vidas disminuyeron, mostrar notificación
-          if (previousLives > currentPlayer.lives && previousLives > 0) {
-            console.log(`💔 Vidas actualizadas: ${previousLives} → ${currentPlayer.lives}`);
-            setSubmissionStatus('life-lost');
-            setTimeout(() => {
-              if (currentPlayer.lives > 0) {
-                setSubmissionStatus(null);
-              }
-            }, 3000);
+          // Solo actualizar si realmente cambió
+          if (previousLives !== currentPlayer.lives) {
+            setPlayerLives(currentPlayer.lives);
+            console.log(`🔄 Vidas actualizadas via ranking: ${previousLives} → ${currentPlayer.lives}`);
           }
         }
         
@@ -446,8 +456,8 @@ export default function Game() {
       if (playerId === socketId) {
         const previousLives = playerLives;
         
-        // Marcar qué vida se perdió para la animación
-        setLostLifeIndex(livesRemaining); // La vida que se perdió es la que ahora está en la posición livesRemaining
+        // Marcar qué vida se perdió para la animación (la última vida activa)
+        setLostLifeIndex(previousLives - 1); // La vida que se perdió es la última que estaba activa
         
         setPlayerLives(livesRemaining);
         console.log(`💔 Perdiste una vida. Vidas restantes: ${livesRemaining} (modo: ${mode})`);
@@ -462,10 +472,10 @@ export default function Game() {
           }
           // Limpiar la animación de pérdida de vida
           setLostLifeIndex(-1);
-        }, 4000); // Aumentado a 4 segundos para mejor visibilidad
+        }, 3000); // 3 segundos para mostrar la notificación
         
         // Log adicional para debugging
-        console.log(`🔄 Vidas actualizadas: ${previousLives} → ${livesRemaining}, vida perdida en índice: ${livesRemaining}`);
+        console.log(`🔄 Vidas actualizadas: ${previousLives} → ${livesRemaining}, vida perdida en índice: ${previousLives - 1}`);
       }
     });
 
@@ -477,9 +487,9 @@ export default function Game() {
       setCorrectAnswersData(data);
       setShowCorrectAnswers(true);
       
-      // Ocultar otros elementos de la interfaz temporalmente
-      setQuestion(null);
-      setTimeLeft(null);
+      // NO ocultar la pregunta ni el tiempo, mantener la interfaz estable
+      // setQuestion(null); // COMENTADO: Esto causaba problemas
+      // setTimeLeft(null); // COMENTADO: Esto causaba problemas
       
       // Limpiar estados de envío
       setIsSubmitting(false);
@@ -684,8 +694,8 @@ export default function Game() {
     setShowCorrectAnswers(false);
     setCorrectAnswersData(null);
     
-    // Resetear el estado del juego para la siguiente pregunta
-    resetGameState();
+    // NO resetear el estado del juego aquí, ya que la siguiente pregunta llegará automáticamente
+    // resetGameState(); // COMENTADO: Esto causaba problemas de estado
   };
 
   // Debug info - solo en desarrollo
@@ -773,7 +783,7 @@ export default function Game() {
                             className={`${styles.lifeHeart} ${
                               i < playerLives ? styles.lifeActive : styles.lifeInactive
                             } ${
-                              i === lostLifeIndex && submissionStatus === 'life-lost' ? styles.lifeLost : ''
+                              i === lostLifeIndex ? styles.lifeLost : ''
                             }`}
                           >
                             ❤️
