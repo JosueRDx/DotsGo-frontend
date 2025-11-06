@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, Clock, Users, Target } from 'lucide-react';
+import { CheckCircle, Clock, Users, Target, AlertCircle } from 'lucide-react';
 import styles from './CorrectAnswersDisplay.module.css';
 import { availableSymbols } from '../Designer/pictogramData';
 
@@ -224,30 +224,125 @@ export default function CorrectAnswersDisplay({
                   {playerAnswer.question.title}
                 </h5>
                 
-                {/* Respuesta correcta visual */}
-                {renderCorrectPictogram(playerAnswer.question.correctAnswer)}
-                
-                {/* Detalles de la respuesta */}
-                <div className={styles.answerDetails}>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Pictograma:</span>
-                    <span className={styles.detailValue}>
-                      {playerAnswer.question.correctAnswer.pictogram || 'Ninguno'}
-                    </span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Colores:</span>
-                    <span className={styles.detailValue}>
-                      {playerAnswer.question.correctAnswer.colors?.join(', ') || 'Ninguno'}
-                    </span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Número:</span>
-                    <span className={styles.detailValue}>
-                      {playerAnswer.question.correctAnswer.number || 'Ninguno'}
-                    </span>
-                  </div>
+                {/* NUEVO: Estado de la respuesta */}
+                <div className={`${styles.answerStatus} ${playerAnswer.playerAnswer?.isCorrect ? styles.correct : styles.incorrect}`}>
+                  {playerAnswer.playerAnswer?.isCorrect ? (
+                    <>
+                      <CheckCircle size={20} />
+                      <span>¡Respuesta Correcta!</span>
+                      <span className={styles.points}>+{playerAnswer.playerAnswer.pointsAwarded} puntos</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle size={20} />
+                      <span>Respuesta Incorrecta</span>
+                    </>
+                  )}
                 </div>
+
+                {/* NUEVO: Comparación de respuestas (solo si es incorrecta) */}
+                {!playerAnswer.playerAnswer?.isCorrect && (
+                  <div className={styles.answerComparison}>
+                    {/* Tu respuesta */}
+                    <div className={styles.comparisonSection}>
+                      <h6 className={styles.comparisonTitle}>
+                        <span className={styles.incorrectIcon}>❌</span>
+                        Tu Respuesta:
+                      </h6>
+                      <div className={styles.playerAnswerVisual}>
+                        {playerAnswer.playerAnswer.givenAnswer?.pictogram || 
+                         playerAnswer.playerAnswer.givenAnswer?.colors?.length > 0 || 
+                         playerAnswer.playerAnswer.givenAnswer?.number ? (
+                          renderCorrectPictogram(playerAnswer.playerAnswer.givenAnswer)
+                        ) : (
+                          <div className={styles.noAnswerPlaceholder}>
+                            <span>Sin respuesta</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className={styles.answerDetails}>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Pictograma:</span>
+                          <span className={styles.detailValue}>
+                            {playerAnswer.playerAnswer.givenAnswer?.pictogram || 'Ninguno'}
+                          </span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Colores:</span>
+                          <span className={styles.detailValue}>
+                            {playerAnswer.playerAnswer.givenAnswer?.colors?.join(', ') || 'Ninguno'}
+                          </span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Número:</span>
+                          <span className={styles.detailValue}>
+                            {playerAnswer.playerAnswer.givenAnswer?.number || 'Ninguno'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Respuesta correcta */}
+                    <div className={styles.comparisonSection}>
+                      <h6 className={styles.comparisonTitle}>
+                        <span className={styles.correctIcon}>✅</span>
+                        Respuesta Correcta:
+                      </h6>
+                      <div className={styles.correctAnswerVisual}>
+                        {renderCorrectPictogram(playerAnswer.question.correctAnswer)}
+                      </div>
+                      <div className={styles.answerDetails}>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Pictograma:</span>
+                          <span className={styles.detailValue}>
+                            {playerAnswer.question.correctAnswer.pictogram || 'Ninguno'}
+                          </span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Colores:</span>
+                          <span className={styles.detailValue}>
+                            {playerAnswer.question.correctAnswer.colors?.join(', ') || 'Ninguno'}
+                          </span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Número:</span>
+                          <span className={styles.detailValue}>
+                            {playerAnswer.question.correctAnswer.number || 'Ninguno'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* NUEVO: Solo mostrar respuesta correcta si la respuesta fue correcta */}
+                {playerAnswer.playerAnswer?.isCorrect && (
+                  <div className={styles.correctOnlySection}>
+                    <div className={styles.correctAnswerVisual}>
+                      {renderCorrectPictogram(playerAnswer.question.correctAnswer)}
+                    </div>
+                    <div className={styles.answerDetails}>
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Pictograma:</span>
+                        <span className={styles.detailValue}>
+                          {playerAnswer.question.correctAnswer.pictogram || 'Ninguno'}
+                        </span>
+                      </div>
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Colores:</span>
+                        <span className={styles.detailValue}>
+                          {playerAnswer.question.correctAnswer.colors?.join(', ') || 'Ninguno'}
+                        </span>
+                      </div>
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Número:</span>
+                        <span className={styles.detailValue}>
+                          {playerAnswer.question.correctAnswer.number || 'Ninguno'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}

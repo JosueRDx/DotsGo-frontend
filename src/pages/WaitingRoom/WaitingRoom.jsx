@@ -4,6 +4,7 @@ import { Users, Crown, Play, Clock, Wifi, WifiOff, Zap } from "lucide-react";
 import styles from "./WaitingRoom.module.css";
 import logo from "../../assets/images/logo.png";
 import { socket, connectSocket } from "../../services/websocket/socketService";
+import { useUserPersistence } from "../../hooks/useUserPersistence";
 
 export default function WaitingRoom() {
   const [players, setPlayers] = useState([]);
@@ -13,6 +14,7 @@ export default function WaitingRoom() {
   const [countdown, setCountdown] = useState(null);
   const [isGameStarting, setIsGameStarting] = useState(false);
   const [transitionPhase, setTransitionPhase] = useState('waiting'); // 'waiting', 'countdown', 'starting', 'transitioning'
+  const { restoreUserProgress } = useUserPersistence();
   const autoNavigateRef = useRef(false);
   const rejoinAttemptedRef = useRef(false);
   const navigate = useNavigate();
@@ -33,6 +35,37 @@ export default function WaitingRoom() {
     try {
       character = JSON.parse(characterData);
       setCurrentUser({ username, character });
+    } catch (error) {
+      console.error("Error al cargar personaje desde localStorage:", error);
+      
+      // NUEVO: Intentar restaurar desde el progreso guardado
+      const restoredCharacter = restoreUserProgress(username);
+      if (restoredCharacter) {
+        character = restoredCharacter;
+        setCurrentUser({ username, character });
+        console.log("Personaje restaurado en WaitingRoom:", restoredCharacter);
+      } else {
+        console.log("No se pudo restaurar el personaje, redirigiendo al inicio");
+        navigate("/");
+        return;
+      }
+    }
+
+    if (!character) {
+      // NUEVO: Si no hay personaje, intentar restaurar desde progreso guardado
+      const restoredCharacter = restoreUserProgress(username);
+      if (restoredCharacter) {
+        character = restoredCharacter;
+        setCurrentUser({ username, character });
+        console.log("Personaje restaurado en WaitingRoom:", restoredCharacter);
+      } else {
+        console.log("No se encontró personaje, redirigiendo al inicio");
+        navigate("/");
+        return;
+      }
+    }
+
+    try {
 
       // Obtener información del juego
       setGameInfo({

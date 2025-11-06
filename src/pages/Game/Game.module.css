@@ -650,6 +650,28 @@
   animation: spin 2s linear infinite;
 }
 
+/* Status message for waiting life check */
+.waitingLifeCheck {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #f59e0b;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.waitingLifeCheck svg {
+  color: #f59e0b;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
 /* Animaciones para zonas interactivas del rombo */
 @keyframes pulseRombo {
   0% {
@@ -1121,8 +1143,9 @@ nimaciones */
   50% {
     transform: scale(1.1);
   }
-}/*
- Life Lost Message */
+}
+
+/* Life Lost Message */
 .lifeLostMessage {
   display: flex;
   align-items: center;
@@ -1133,6 +1156,70 @@ nimaciones */
   border-radius: 16px;
   margin: 15px 0;
   animation: lifeLostPulse 0.6s ease-out;
+}
+
+/* Eliminated Message - Modo Duelo */
+.eliminatedMessage {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(75, 85, 99, 0.3), rgba(55, 65, 81, 0.2));
+  border: 2px solid #6b7280;
+  border-radius: 16px;
+  margin: 15px 0;
+  animation: eliminatedPulse 0.8s ease-out;
+}
+
+.eliminatedIcon {
+  font-size: 2rem;
+  animation: eliminatedShake 1s ease-out;
+}
+
+.eliminatedText h3 {
+  color: #6b7280;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.eliminatedText p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Duel Advance Message */
+.duelAdvanceMessage {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+  border: 2px solid #10b981;
+  border-radius: 16px;
+  margin: 15px 0;
+  animation: duelAdvancePulse 0.6s ease-out;
+}
+
+.duelAdvanceIcon {
+  font-size: 2rem;
+  animation: rocketLaunch 0.8s ease-out;
+}
+
+.duelAdvanceText h3 {
+  color: #10b981;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.duelAdvanceText p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  margin: 0;
+  font-weight: 500;
 }
 
 .lifeLostIcon {
@@ -1202,6 +1289,60 @@ nimaciones */
     transform: scale(0.8);
     opacity: 0.3;
     filter: grayscale(100%) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+}
+
+/* Animaciones para eliminación en duelo */
+@keyframes eliminatedPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes eliminatedShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Animaciones para avance en duelo */
+@keyframes duelAdvancePulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes rocketLaunch {
+  0% {
+    transform: translateY(10px) scale(0.8);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
   }
 }
 

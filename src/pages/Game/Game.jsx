@@ -6,6 +6,7 @@ import { TouchBackend } from 'react-dnd-touch-backend';
 import { CheckCircle, Clock, Zap, Send, AlertCircle, Target, Trophy } from "lucide-react";
 
 import { socket } from "../../services/websocket/socketService";
+import { useUserPersistence } from "../../hooks/useUserPersistence";
 import styles from "./Game.module.css";
 
 import {
@@ -23,6 +24,7 @@ import Header from "../../layouts/header/Header";
 
 export default function Game() {
   const navigate = useNavigate();
+  const { restoreUserProgress } = useUserPersistence();
   
   const isTouchDevice = typeof window !== 'undefined' &&
     ('ontouchstart' in window || navigator.maxTouchPoints > 0);
@@ -67,6 +69,7 @@ export default function Game() {
   const [gameMode, setGameMode] = useState('classic');
   const [playerLives, setPlayerLives] = useState(3);
   const [maxLives, setMaxLives] = useState(3);
+  const [lostLifeIndex, setLostLifeIndex] = useState(-1); // Para animación de pérdida de vida
   
   // NUEVO: Estados para modo duelo
   const [playerPosition, setPlayerPosition] = useState(0);
@@ -228,9 +231,25 @@ export default function Game() {
       try {
         const character = JSON.parse(characterData);
         setSelectedCharacter(character);
-        console.log("Personaje cargado:", character);
+        console.log("Personaje cargado desde localStorage:", character);
       } catch (error) {
-        console.error("Error al cargar personaje:", error);
+        console.error("Error al cargar personaje desde localStorage:", error);
+        
+        // NUEVO: Intentar restaurar desde el progreso guardado
+        if (username) {
+          const restoredCharacter = restoreUserProgress(username);
+          if (restoredCharacter) {
+            setSelectedCharacter(restoredCharacter);
+            console.log("Personaje restaurado desde progreso guardado:", restoredCharacter);
+          }
+        }
+      }
+    } else if (username) {
+      // NUEVO: Si no hay personaje en localStorage, intentar restaurar desde progreso guardado
+      const restoredCharacter = restoreUserProgress(username);
+      if (restoredCharacter) {
+        setSelectedCharacter(restoredCharacter);
+        console.log("Personaje restaurado desde progreso guardado:", restoredCharacter);
       }
     }
 
@@ -361,12 +380,27 @@ export default function Game() {
     socket.on("player-answered", ({ playerId, isCorrect }) => {
       if (playerId === socketId) {
         setIsSubmitting(false);
-        setSubmissionStatus(isCorrect ? 'success' : 'error');
-        setShowSuccessAnimation(isCorrect);
+        
         if (isCorrect) {
+          setSubmissionStatus('success');
+          setShowSuccessAnimation(true);
           setTimeout(() => setShowSuccessAnimation(false), 2000);
         } else {
-          setTimeout(() => setSubmissionStatus(null), 3000);
+          // En modos con vidas, esperar el evento player-life-lost para mostrar el estado correcto
+          if (gameMode === 'adventure' || gameMode === 'duel') {
+            setSubmissionStatus('waiting-life-check');
+            // Timeout de respaldo por si no llega el evento de vida
+            setTimeout(() => {
+              if (submissionStatus === 'waiting-life-check') {
+                setSubmissionStatus('error');
+                setTimeout(() => setSubmissionStatus(null), 3000);
+              }
+            }, 1000);
+          } else {
+            // Modo clásico: mostrar error normal
+            setSubmissionStatus('error');
+            setTimeout(() => setSubmissionStatus(null), 3000);
+          }
         }
       }
     });
@@ -380,10 +414,10 @@ export default function Game() {
         setMaxLives(modeConfig.maxLives);
       }
       
-      // Encontrar las vidas y posición del jugador actual
+      // Encontrar las vidas y posición del jugador actual (solo para modos que las usen)
       const currentPlayer = players.find(p => p.id === socketId);
-      if (currentPlayer) {
-        // Actualizar vidas
+      if (currentPlayer && (mode === 'adventure' || mode === 'duel')) {
+        // Actualizar vidas (solo en modos que las usen)
         if (typeof currentPlayer.lives === 'number') {
           const previousLives = playerLives;
           setPlayerLives(currentPlayer.lives);
@@ -408,18 +442,30 @@ export default function Game() {
     });
 
     // NUEVO: Escuchar pérdida de vida
-    socket.on("player-life-lost", ({ playerId, livesRemaining }) => {
+    socket.on("player-life-lost", ({ playerId, livesRemaining, mode }) => {
       if (playerId === socketId) {
-        setPlayerLives(livesRemaining);
-        console.log(`💔 Perdiste una vida. Vidas restantes: ${livesRemaining}`);
+        const previousLives = playerLives;
         
-        // NUEVO: Mostrar notificación visual de pérdida de vida
+        // Marcar qué vida se perdió para la animación
+        setLostLifeIndex(livesRemaining); // La vida que se perdió es la que ahora está en la posición livesRemaining
+        
+        setPlayerLives(livesRemaining);
+        console.log(`💔 Perdiste una vida. Vidas restantes: ${livesRemaining} (modo: ${mode})`);
+        
+        // Mostrar notificación visual de pérdida de vida
         setSubmissionStatus('life-lost');
+        
+        // Limpiar el estado después de mostrar la notificación
         setTimeout(() => {
           if (livesRemaining > 0) {
             setSubmissionStatus(null);
           }
-        }, 3000);
+          // Limpiar la animación de pérdida de vida
+          setLostLifeIndex(-1);
+        }, 4000); // Aumentado a 4 segundos para mejor visibilidad
+        
+        // Log adicional para debugging
+        console.log(`🔄 Vidas actualizadas: ${previousLives} → ${livesRemaining}, vida perdida en índice: ${livesRemaining}`);
       }
     });
 
@@ -441,6 +487,32 @@ export default function Game() {
       setShowSuccessAnimation(false);
       
       console.log("📋 Estado actualizado - showCorrectAnswers:", true);
+    });
+
+    // NUEVO: Escuchar actualizaciones de posición en duelo
+    socket.on("duel-position-update", ({ playerId, username, position, action, reason, points }) => {
+      if (playerId === socketId) {
+        console.log(`⚔️ Actualización de duelo: ${action} - Posición: ${position}`);
+        
+        if (action === 'eliminated') {
+          console.log(`💀 Fuiste eliminado del duelo: ${reason}`);
+          setSubmissionStatus('eliminated');
+          
+          // Mostrar mensaje de eliminación por más tiempo
+          setTimeout(() => {
+            setSubmissionStatus(null);
+          }, 5000);
+        } else if (action === 'advance') {
+          console.log(`🚀 Avanzaste ${points} posiciones en el duelo`);
+          setPlayerPosition(position);
+          
+          // Mostrar feedback positivo
+          setSubmissionStatus('duel-advance');
+          setTimeout(() => {
+            setSubmissionStatus(null);
+          }, 2000);
+        }
+      }
     });
 
     // NUEVO: Escuchar Game Over individual (modo aventura)
@@ -475,6 +547,7 @@ export default function Game() {
       socket.off("player-game-over");
       socket.off("ranking-updated");
       socket.off("player-life-lost");
+      socket.off("duel-position-update");
     };
   }, [navigate]);
 
@@ -492,6 +565,7 @@ export default function Game() {
     setSubmissionStatus(null);
     setShowSuccessAnimation(false);
     setProgressPercentage(0);
+    setLostLifeIndex(-1); // Resetear animación de pérdida de vida
   };
 
   // Limpiar selección actual sin afectar el estado de envío
@@ -699,7 +773,7 @@ export default function Game() {
                             className={`${styles.lifeHeart} ${
                               i < playerLives ? styles.lifeActive : styles.lifeInactive
                             } ${
-                              i === playerLives && submissionStatus === 'life-lost' ? styles.lifeLost : ''
+                              i === lostLifeIndex && submissionStatus === 'life-lost' ? styles.lifeLost : ''
                             }`}
                           >
                             ❤️
@@ -888,12 +962,50 @@ export default function Game() {
                 </div>
               )}
 
+              {submissionStatus === 'waiting-life-check' && (
+                <div className={styles.waitingLifeCheck}>
+                  <AlertCircle size={25} />
+                  <span>Verificando respuesta...</span>
+                </div>
+              )}
+
+              {submissionStatus === 'error' && (
+                <div className={styles.statusMessage} style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  color: '#ef4444'
+                }}>
+                  <AlertCircle size={25} />
+                  <span>Respuesta incorrecta</span>
+                </div>
+              )}
+
               {submissionStatus === 'life-lost' && (
                 <div className={styles.lifeLostMessage}>
                   <div className={styles.lifeLostIcon}>💔</div>
                   <div className={styles.lifeLostText}>
                     <h3>¡Perdiste una vida!</h3>
                     <p>Te quedan {playerLives} vida{playerLives !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+              )}
+
+              {submissionStatus === 'eliminated' && (
+                <div className={styles.eliminatedMessage}>
+                  <div className={styles.eliminatedIcon}>💀</div>
+                  <div className={styles.eliminatedText}>
+                    <h3>¡Fuiste eliminado!</h3>
+                    <p>Respuesta incorrecta en modo duelo</p>
+                  </div>
+                </div>
+              )}
+
+              {submissionStatus === 'duel-advance' && (
+                <div className={styles.duelAdvanceMessage}>
+                  <div className={styles.duelAdvanceIcon}>🚀</div>
+                  <div className={styles.duelAdvanceText}>
+                    <h3>¡Avanzaste!</h3>
+                    <p>Posición actual: {playerPosition}/10</p>
                   </div>
                 </div>
               )}

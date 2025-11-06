@@ -12,15 +12,18 @@ export const useUserPersistence = () => {
     const saveUserProgress = (gamePin, username) => {
         try {
             const progressKey = `userProgress_${username}`;
+            const selectedCharacter = localStorage.getItem("selectedCharacter");
+            
             const currentProgress = {
                 gamePin,
                 username,
+                selectedCharacter: selectedCharacter ? JSON.parse(selectedCharacter) : null,
                 timestamp: Date.now(),
                 savedAt: new Date().toISOString()
             };
 
             localStorage.setItem(progressKey, JSON.stringify(currentProgress));
-            console.log(`Progreso guardado para ${username} en juego ${gamePin}`);
+            console.log(`Progreso guardado para ${username} en juego ${gamePin}`, currentProgress);
         } catch (error) {
             console.error("Error guardando progreso del usuario:", error);
         }
@@ -44,7 +47,7 @@ export const useUserPersistence = () => {
 
                 // Limpiar datos de la partida activa pero mantener el progreso guardado
                 localStorage.removeItem("gamePin");
-                localStorage.removeItem("selectedCharacter");
+                // NO eliminar selectedCharacter - se mantiene para reconexión
                 localStorage.removeItem("tempUsername");
                 localStorage.removeItem("questionsCount");
                 localStorage.removeItem("joiningInProgress");
@@ -68,7 +71,7 @@ export const useUserPersistence = () => {
 
                     // Limpiar datos de la partida activa pero mantener el progreso guardado
                     localStorage.removeItem("gamePin");
-                    localStorage.removeItem("selectedCharacter");
+                    // NO eliminar selectedCharacter - se mantiene para reconexión
                     localStorage.removeItem("tempUsername");
                     localStorage.removeItem("questionsCount");
                     localStorage.removeItem("joiningInProgress");
@@ -101,11 +104,11 @@ export const useUserPersistence = () => {
 
     const clearGameData = () => {
         localStorage.removeItem("gamePin");
-        localStorage.removeItem("selectedCharacter");
+        // NO eliminar selectedCharacter - se mantiene para reconexión
         localStorage.removeItem("tempUsername");
         localStorage.removeItem("questionsCount");
         localStorage.removeItem("joiningInProgress");
-        // Mantener el username guardado
+        // Mantener el username y selectedCharacter guardados
     };
 
     const isInGame = () => {
@@ -135,6 +138,22 @@ export const useUserPersistence = () => {
         }
     };
 
+    // NUEVO: Función para restaurar el progreso del usuario
+    const restoreUserProgress = (username) => {
+        try {
+            const savedProgress = getUserProgress(username);
+            if (savedProgress && savedProgress.selectedCharacter) {
+                localStorage.setItem("selectedCharacter", JSON.stringify(savedProgress.selectedCharacter));
+                console.log(`Personaje restaurado para ${username}:`, savedProgress.selectedCharacter.name);
+                return savedProgress.selectedCharacter;
+            }
+            return null;
+        } catch (error) {
+            console.error("Error restaurando progreso del usuario:", error);
+            return null;
+        }
+    };
+
     return {
         saveUsername,
         getSavedUsername,
@@ -142,6 +161,7 @@ export const useUserPersistence = () => {
         isInGame,
         saveUserProgress,
         getUserProgress,
-        clearUserProgress
+        clearUserProgress,
+        restoreUserProgress
     };
 };

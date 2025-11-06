@@ -6,7 +6,7 @@ import { useUserPersistence } from '../../hooks/useUserPersistence';
  * Solo para debugging - remover en producción
  */
 export default function UserPersistenceStatus() {
-  const { getSavedUsername, isInGame } = useUserPersistence();
+  const { getSavedUsername, isInGame, getUserProgress } = useUserPersistence();
   
   if (process.env.NODE_ENV !== 'development') {
     return null;
@@ -14,6 +14,15 @@ export default function UserPersistenceStatus() {
 
   const savedUsername = getSavedUsername();
   const inGame = isInGame();
+  const selectedCharacterData = localStorage.getItem('selectedCharacter');
+  const userProgress = savedUsername ? getUserProgress(savedUsername) : null;
+  
+  let selectedCharacter = null;
+  try {
+    selectedCharacter = selectedCharacterData ? JSON.parse(selectedCharacterData) : null;
+  } catch (error) {
+    // Ignorar errores de parsing
+  }
 
   return (
     <div style={{
@@ -26,11 +35,16 @@ export default function UserPersistenceStatus() {
       borderRadius: '8px',
       fontSize: '12px',
       zIndex: 9999,
-      fontFamily: 'monospace'
+      fontFamily: 'monospace',
+      maxWidth: '250px'
     }}>
       <div>👤 Usuario: {savedUsername || 'No guardado'}</div>
       <div>🎮 En juego: {inGame ? 'Sí' : 'No'}</div>
       <div>📍 PIN: {localStorage.getItem('gamePin') || 'N/A'}</div>
+      <div>🎭 Personaje: {selectedCharacter?.name || 'No seleccionado'}</div>
+      {userProgress && (
+        <div>💾 Progreso: {userProgress.selectedCharacter?.name || 'Sin personaje guardado'}</div>
+      )}
     </div>
   );
 }
