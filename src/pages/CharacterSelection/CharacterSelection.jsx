@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Play, Users, Star, Zap, CheckCircle } from "lucide-react";
 import styles from "./CharacterSelection.module.css";
 import logo from "../../assets/images/logo.png";
-import { socket, connectSocket } from "../../services/websocket/socketService";
+import { socket, connectSocket, saveSession, getSession, saveGameData } from "../../services/websocket/socketService";
+import MultiAccountBlock from "../../components/MultiAccountBlock";
 
 // Importar imágenes de personajes
 import personaje1 from "../../assets/images/personajes/1.png";
@@ -23,7 +24,31 @@ export default function CharacterSelection() {
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockReason, setBlockReason] = useState("");
   const navigate = useNavigate();
+
+  // NUEVO: Verificar multicuenta al cargar el componente
+  React.useEffect(() => {
+    // Verificar si hay una sesión activa en localStorage
+    const existingSession = getSession();
+    const currentPin = localStorage.getItem("gamePin");
+    
+    if (existingSession && existingSession.pin === currentPin) {
+      // Hay una sesión activa en este juego
+      const currentUsername = localStorage.getItem("tempUsername");
+      
+      // Si el username es diferente, es un intento de multicuenta
+      if (existingSession.username !== currentUsername) {
+        console.log('🚫 Multicuenta detectada en frontend');
+        console.log('   Usuario existente:', existingSession.username);
+        console.log('   Intento:', currentUsername);
+        
+        setBlockReason(`Ya estás jugando como "${existingSession.username}". No puedes crear otra cuenta.`);
+        setIsBlocked(true);
+      }
+    }
+  }, []);
 
   // Datos de los personajes
   const characters = [
@@ -157,6 +182,10 @@ export default function CharacterSelection() {
 
     connectSocket();
 
+    // Recuperar sesión existente si hay una
+    const existingSession = getSession();
+    const sessionId = existingSession?.sessionId || null;
+
     // Enviar información del personaje junto con los datos del jugador
     socket.emit("join-game", { 
       pin, 
@@ -165,12 +194,33 @@ export default function CharacterSelection() {
         id: selectedCharacter.id,
         name: selectedCharacter.name,
         image: selectedCharacter.image,
-        specialty: selectedCharacter.specialty // AGREGADO: specialty
-      }
+        specialty: selectedCharacter.specialty
+      },
+      sessionId // Incluir sessionId para reconexión
     }, (response) => {
       setLoading(false);
       if (response.success) {
-        // NUEVO: Guardar datos persistentes del jugador
+        // Guardar sesión persistente
+        saveSession({
+          sessionId: response.sessionId,
+          pin,
+          username,
+          character: {
+            id: selectedCharacter.id,
+            name: selectedCharacter.name,
+            image: selectedCharacter.image,
+            specialty: selectedCharacter.specialty
+          }
+        });
+
+        // Guardar datos del juego
+        saveGameData({
+          pin,
+          username,
+          character: selectedCharacter,
+          totalQuestions: response.totalQuestions
+        });
+
         localStorage.setItem("username", username);
         localStorage.setItem("selectedCharacter", JSON.stringify(selectedCharacter));
 
@@ -180,6 +230,17 @@ export default function CharacterSelection() {
         
         // Limpiar datos temporales
         localStorage.removeItem("tempUsername");
+        
+        // Manejar reconexión
+        if (response.reconnected) {
+          console.log("✅ Reconectado exitosamente");
+          // Restaurar estado del jugador
+          if (response.playerData) {
+            localStorage.setItem("playerScore", response.playerData.score || 0);
+            localStorage.setItem("playerLives", response.playerData.lives || 3);
+          }
+        }
+        
         const joiningInProgress = response.gameStatus === "playing";
         if (joiningInProgress) {
           localStorage.setItem("joiningInProgress", "true");
@@ -194,7 +255,14 @@ export default function CharacterSelection() {
         // MEJORADO: Manejo específico de errores de nombres duplicados
         const errorMessage = response.error || "Error al unirse al juego";
         
-        if (errorMessage.includes("Ya existe un jugador con ese nombre")) {
+        // Manejo específico por código de error
+        if (response.code === 'DUPLICATE_BROWSER') {
+          setBlockReason(response.error || "Ya tienes una cuenta activa en este juego desde otra pestaña o ventana.");
+          setIsBlocked(true);
+        } else if (response.code === 'IP_LIMIT_REACHED') {
+          setBlockReason(response.error || "Límite de jugadores alcanzado desde esta red. Máximo 2 jugadores por conexión.");
+          setIsBlocked(true);
+        } else if (errorMessage.includes("Ya existe un jugador con ese nombre")) {
           setError("⚠️ Nombre ya en uso. Alguien más ya está usando este nombre en la sala. Por favor, vuelve atrás y elige otro nombre.");
         } else if (errorMessage.includes("Juego no encontrado")) {
           setError("❌ Sala no encontrada. Verifica que el PIN sea correcto.");
@@ -218,6 +286,14 @@ export default function CharacterSelection() {
 
   return (
     <div className={styles.selectionWrapper}>
+      {/* Multi-Account Block Overlay */}
+      {isBlocked && (
+        <MultiAccountBlock 
+          reason={blockReason}
+          onClose={() => navigate('/')}
+        />
+      )}
+
       {/* Loading Overlay */}
       {loading && (
         <div className={styles.loadingOverlay}>

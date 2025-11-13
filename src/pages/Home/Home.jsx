@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Gamepad2, Users, Zap, Trophy, Play, ArrowRight } from "lucide-react";
 import styles from "./Home.module.css";
 import logo from "../../assets/images/logo.png";
-import { socket, connectSocket } from "../../services/websocket/socketService";
+import { socket, connectSocket, getSession, clearSession } from "../../services/websocket/socketService";
+import MultiAccountBlock from "../../components/MultiAccountBlock";
 
 const VALID_USERNAME = "fernando25";
 const VALID_PASSWORD = "mineria25";
@@ -16,7 +17,62 @@ export default function Home() {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [reconnecting, setReconnecting] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockReason, setBlockReason] = useState("");
   const navigate = useNavigate();
+
+  // Verificar si hay una sesión activa al cargar
+  useEffect(() => {
+    const session = getSession();
+    
+    if (session && session.sessionId && session.pin) {
+      console.log('🔄 Sesión activa detectada, intentando reconectar...');
+      setReconnecting(true);
+      
+      // Conectar socket si no está conectado
+      if (!socket.connected) {
+        connectSocket();
+      }
+      
+      // Esperar a que el socket se conecte
+      const handleConnect = () => {
+        socket.emit('join-game', {
+          pin: session.pin,
+          username: session.username,
+          character: session.character,
+          sessionId: session.sessionId
+        }, (response) => {
+          setReconnecting(false);
+          
+          if (response.success && response.reconnected) {
+            console.log('✅ Reconexión automática exitosa');
+            
+            // Restaurar datos en localStorage
+            localStorage.setItem('gamePin', session.pin);
+            localStorage.setItem('username', session.username);
+            localStorage.setItem('selectedCharacter', JSON.stringify(session.character));
+            
+            // Redirigir según el estado del juego
+            if (response.gameStatus === 'playing') {
+              navigate('/game');
+            } else if (response.gameStatus === 'waiting') {
+              navigate('/waiting-room');
+            }
+          } else {
+            console.log('❌ No se pudo reconectar:', response.error);
+            clearSession();
+          }
+        });
+      };
+      
+      if (socket.connected) {
+        handleConnect();
+      } else {
+        socket.once('connect', handleConnect);
+      }
+    }
+  }, [navigate]);
 
   const handleCloseLogin = useCallback(() => {
     setShowLogin(false);
@@ -179,6 +235,17 @@ export default function Home() {
 
   return (
     <div className={styles.homeContainer}>
+      {/* Multi-Account Block Overlay */}
+      {isBlocked && (
+        <MultiAccountBlock 
+          reason={blockReason}
+          onClose={() => {
+            setIsBlocked(false);
+            setBlockReason("");
+          }}
+        />
+      )}
+
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.logoSection}>
