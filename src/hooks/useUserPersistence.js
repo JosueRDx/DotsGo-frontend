@@ -58,25 +58,27 @@ export const useUserPersistence = () => {
         };
 
         const handleVisibilityChange = () => {
+            const gamePin = localStorage.getItem("gamePin");
+            const username = localStorage.getItem("username");
+
+            if (!gamePin || !username) return;
+
             if (document.visibilityState === 'hidden') {
-                const gamePin = localStorage.getItem("gamePin");
-                const username = localStorage.getItem("username");
-
-                if (gamePin && username) {
-                    // NUEVO: Guardar progreso del usuario antes de salir
-                    saveUserProgress(gamePin, username);
-
-                    // Usar la función del servicio para salir limpiamente
-                    leaveGameCleanly(gamePin, username);
-
-                    // Limpiar datos de la partida activa pero mantener el progreso guardado
-                    localStorage.removeItem("gamePin");
-                    // NO eliminar selectedCharacter - se mantiene para reconexión
-                    localStorage.removeItem("tempUsername");
-                    localStorage.removeItem("questionsCount");
-                    localStorage.removeItem("joiningInProgress");
-
-                    console.log(`Usuario ${username} desconectado por cambio de visibilidad - Progreso guardado`);
+                console.log(`👁️ Pestaña oculta - Usuario: ${username}`);
+                
+                // Notificar al backend que el usuario cambió de pestaña
+                if (socket.connected) {
+                    socket.emit('tab-hidden', { pin: gamePin, username });
+                }
+                
+                // Guardar progreso
+                saveUserProgress(gamePin, username);
+            } else if (document.visibilityState === 'visible') {
+                console.log(`👁️ Pestaña visible - Usuario: ${username}`);
+                
+                // Notificar al backend que el usuario volvió
+                if (socket.connected) {
+                    socket.emit('tab-visible', { pin: gamePin, username });
                 }
             }
         };

@@ -13,53 +13,45 @@ export const socket = io(API_URL, {
   timeout: 20000,
 });
 
-// Gestión de sesión persistente
-const SESSION_STORAGE_KEY = 'dotsgo_session';
-const GAME_DATA_KEY = 'dotsgo_game_data';
-const ACTIVE_TAB_KEY = 'dotsgo_active_tab';
+// 🔑 SISTEMA HÍBRIDO: localStorage + Socket.ID
+// localStorage: Compartido entre pestañas del mismo navegador
+// Socket.ID: Único por pestaña, pero vinculado a la sesión del navegador
 
-// Generar ID único para esta pestaña
-const TAB_ID = `tab_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const SESSION_KEY = 'dotsgo_browser_session';
+const GAME_DATA_KEY = 'dotsgo_game_data';
 
 /**
- * Guarda la sesión del jugador en localStorage
+ * Guarda la sesión del navegador (compartida entre pestañas)
  */
-export const saveSession = (sessionData) => {
+export const saveBrowserSession = (sessionData) => {
   try {
-    const sessionWithTab = {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
       ...sessionData,
-      timestamp: Date.now(),
-      tabId: TAB_ID
-    };
-    
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionWithTab));
-    
-    // Marcar esta pestaña como activa
-    localStorage.setItem(ACTIVE_TAB_KEY, TAB_ID);
-    
-    console.log('✅ Sesión guardada:', sessionData);
+      timestamp: Date.now()
+    }));
+    console.log('✅ Sesión del navegador guardada:', sessionData);
   } catch (error) {
     console.error('Error guardando sesión:', error);
   }
 };
 
 /**
- * Recupera la sesión del jugador desde localStorage
+ * Recupera la sesión del navegador
  */
-export const getSession = () => {
+export const getBrowserSession = () => {
   try {
-    const sessionStr = localStorage.getItem(SESSION_STORAGE_KEY);
+    const sessionStr = localStorage.getItem(SESSION_KEY);
     if (!sessionStr) return null;
     
     const session = JSON.parse(sessionStr);
     
-    // Verificar que la sesión no tenga más de 3 minutos
+    // Verificar que la sesión no tenga más de 3 minutos sin actividad
     const elapsed = Date.now() - session.timestamp;
     const THREE_MINUTES = 3 * 60 * 1000;
     
     if (elapsed > THREE_MINUTES) {
       console.log('⏰ Sesión expirada, eliminando...');
-      clearSession();
+      clearBrowserSession();
       return null;
     }
     
@@ -71,41 +63,25 @@ export const getSession = () => {
 };
 
 /**
- * Limpia la sesión del localStorage
+ * Limpia la sesión del navegador
  */
-export const clearSession = () => {
+export const clearBrowserSession = () => {
   try {
-    localStorage.removeItem(SESSION_STORAGE_KEY);
+    localStorage.removeItem(SESSION_KEY);
     localStorage.removeItem(GAME_DATA_KEY);
-    localStorage.removeItem(ACTIVE_TAB_KEY);
-    console.log('🗑️ Sesión limpiada');
+    console.log('🗑️ Sesión del navegador limpiada');
   } catch (error) {
     console.error('Error limpiando sesión:', error);
   }
 };
 
 /**
- * Verifica si hay otra pestaña activa con sesión
- * @returns {boolean} True si hay otra pestaña activa
+ * Actualiza el timestamp de la sesión (mantenerla activa)
  */
-export const hasActiveTabWithSession = () => {
-  try {
-    const session = getSession();
-    if (!session) return false;
-    
-    const activeTabId = localStorage.getItem(ACTIVE_TAB_KEY);
-    
-    // Si no hay pestaña activa marcada, esta es la primera
-    if (!activeTabId) return false;
-    
-    // Si la pestaña activa es esta misma, no hay conflicto
-    if (activeTabId === TAB_ID) return false;
-    
-    // Hay otra pestaña activa
-    return true;
-  } catch (error) {
-    console.error('Error verificando pestaña activa:', error);
-    return false;
+export const updateSessionTimestamp = () => {
+  const session = getBrowserSession();
+  if (session) {
+    saveBrowserSession(session);
   }
 };
 
@@ -163,67 +139,45 @@ export const leaveGameCleanly = (pin, username) => {
     socket.emit("leave-game", { pin, username });
     console.log(`👋 Usuario ${username} salió limpiamente del juego ${pin}`);
   }
-  // Limpiar sesión al salir voluntariamente
-  clearSession();
+  // Limpiar sesión del navegador
+  clearBrowserSession();
 };
 
-/**
- * Intenta reconectar al jugador a un juego existente
- * @param {Object} callbacks - Callbacks para manejar eventos de reconexión
- */
-export const attemptReconnection = (callbacks = {}) => {
-  const session = getSession();
-  
-  if (!session || !session.sessionId || !session.pin) {
-    console.log('❌ No hay sesión válida para reconectar');
-    return false;
-  }
-  
-  console.log('🔄 Intentando reconexión automática...', session);
-  
-  // Configurar listeners de reconexión
-  socket.on('player-reconnected', (data) => {
-    console.log('✅ Reconexión exitosa:', data);
-    if (callbacks.onReconnected) {
-      callbacks.onReconnected(data);
-    }
-  });
-  
-  socket.on('connect_error', (error) => {
-    console.error('❌ Error de conexión:', error);
-    if (callbacks.onError) {
-      callbacks.onError(error);
-    }
-  });
-  
-  // Conectar socket si no está conectado
-  if (!socket.connected) {
-    connectSocket();
-  }
-  
-  return true;
-};
-
-// Configurar reconexión automática al detectar reconexión del socket
+// 🔑 Reconexión automática con sesión del navegador
 socket.on('connect', () => {
   console.log('🔌 Socket conectado:', socket.id);
   
-  const session = getSession();
-  if (session && session.sessionId && session.pin) {
-    console.log('🔄 Detectada sesión previa, intentando reconectar...');
+  // Verificar si hay sesión del navegador
+  const browserSession = getBrowserSession();
+  if (browserSession && browserSession.pin) {
+    console.log('🔄 Sesión del navegador detectada, intentando reconectar...');
+    console.log('   Usuario:', browserSession.username);
+    console.log('   PIN:', browserSession.pin);
     
-    // Intentar unirse nuevamente con el sessionId
+    // Intentar reconectar con la sesión del navegador
     socket.emit('join-game', {
-      pin: session.pin,
-      username: session.username,
-      character: session.character,
-      sessionId: session.sessionId
+      pin: browserSession.pin,
+      username: browserSession.username,
+      character: browserSession.character
     }, (response) => {
-      if (response.success && response.reconnected) {
+      if (response.success) {
         console.log('✅ Reconexión automática exitosa');
-      } else if (!response.success) {
+        updateSessionTimestamp();
+        
+        // Emitir evento para que la UI se actualice
+        socket.emit('browser-session-restored', {
+          username: browserSession.username,
+          character: browserSession.character,
+          gameStatus: response.gameStatus
+        });
+      } else {
         console.log('❌ Reconexión fallida:', response.error);
-        clearSession();
+        if (response.error.includes('Ya existe un jugador')) {
+          // Mantener la sesión, solo actualizar socket.id en backend
+          console.log('⚠️ Jugador ya existe, manteniendo sesión');
+        } else {
+          clearBrowserSession();
+        }
       }
     });
   }
@@ -232,18 +186,8 @@ socket.on('connect', () => {
 socket.on('disconnect', (reason) => {
   console.log('🔌 Socket desconectado:', reason);
   
-  // No limpiar la sesión en desconexión, permitir reconexión
+  // NO limpiar sesión del navegador, permitir reconexión
   if (reason === 'io server disconnect') {
-    // El servidor forzó la desconexión, reconectar manualmente
     socket.connect();
-  }
-});
-
-// Limpiar marca de pestaña activa al cerrar/recargar
-window.addEventListener('beforeunload', () => {
-  const activeTabId = localStorage.getItem(ACTIVE_TAB_KEY);
-  if (activeTabId === TAB_ID) {
-    localStorage.removeItem(ACTIVE_TAB_KEY);
-    console.log('🗑️ Marca de pestaña activa limpiada');
   }
 });

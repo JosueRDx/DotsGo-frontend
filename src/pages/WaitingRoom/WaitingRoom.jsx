@@ -37,7 +37,7 @@ export default function WaitingRoom() {
       setCurrentUser({ username, character });
     } catch (error) {
       console.error("Error al cargar personaje desde localStorage:", error);
-      
+
       // NUEVO: Intentar restaurar desde el progreso guardado
       const restoredCharacter = restoreUserProgress(username);
       if (restoredCharacter) {
@@ -102,7 +102,7 @@ export default function WaitingRoom() {
             if (!response?.success) {
               console.error("Error al reingresar al juego:", response?.error);
               rejoinAttemptedRef.current = false;
-              
+
               // MEJORADO: Manejo específico de nombres duplicados
               if (response?.error?.includes("Ya existe un jugador con ese nombre")) {
                 alert("⚠️ Nombre ya en uso. Alguien más está usando tu nombre en esta sala. Serás redirigido para elegir otro nombre.");
@@ -186,6 +186,17 @@ export default function WaitingRoom() {
       }
     };
 
+    const handlePlayerKicked = (data) => {
+      console.log("❌ Has sido expulsado de la partida:", data);
+      alert(data.message || "Has sido expulsado de la partida por el administrador");
+
+      // Limpiar datos y redirigir al home
+      localStorage.removeItem("gamePin");
+      localStorage.removeItem("username");
+      localStorage.removeItem("selectedCharacter");
+      navigate("/");
+    };
+
     const fetchPlayers = () => {
       socket.emit("get-room-players", { pin: gamePin }, (response) => {
         if (response && response.success && response.players) {
@@ -226,6 +237,7 @@ export default function WaitingRoom() {
     socket.on("game-started", handleGameStarted);
     socket.on("player-joined", handlePlayerJoined);
     socket.on("player-left", handlePlayerLeft);
+    socket.on("player-kicked", handlePlayerKicked);
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
 
@@ -238,6 +250,7 @@ export default function WaitingRoom() {
       socket.off("game-started", handleGameStarted);
       socket.off("player-joined", handlePlayerJoined);
       socket.off("player-left", handlePlayerLeft);
+      socket.off("player-kicked", handlePlayerKicked);
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
     };

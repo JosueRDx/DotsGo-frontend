@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Gamepad2, Users, Zap, Trophy, Play, ArrowRight } from "lucide-react";
 import styles from "./Home.module.css";
 import logo from "../../assets/images/logo.png";
-import { socket, connectSocket, getSession, clearSession } from "../../services/websocket/socketService";
-import MultiAccountBlock from "../../components/MultiAccountBlock";
+import { socket, connectSocket } from "../../services/websocket/socketService";
 
 const VALID_USERNAME = "fernando25";
 const VALID_PASSWORD = "mineria25";
@@ -17,62 +16,10 @@ export default function Home() {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [isLoginLoading, setIsLoginLoading] = useState(false);
-  const [reconnecting, setReconnecting] = useState(false);
-  const [isBlocked, setIsBlocked] = useState(false);
-  const [blockReason, setBlockReason] = useState("");
   const navigate = useNavigate();
 
-  // Verificar si hay una sesión activa al cargar
-  useEffect(() => {
-    const session = getSession();
-    
-    if (session && session.sessionId && session.pin) {
-      console.log('🔄 Sesión activa detectada, intentando reconectar...');
-      setReconnecting(true);
-      
-      // Conectar socket si no está conectado
-      if (!socket.connected) {
-        connectSocket();
-      }
-      
-      // Esperar a que el socket se conecte
-      const handleConnect = () => {
-        socket.emit('join-game', {
-          pin: session.pin,
-          username: session.username,
-          character: session.character,
-          sessionId: session.sessionId
-        }, (response) => {
-          setReconnecting(false);
-          
-          if (response.success && response.reconnected) {
-            console.log('✅ Reconexión automática exitosa');
-            
-            // Restaurar datos en localStorage
-            localStorage.setItem('gamePin', session.pin);
-            localStorage.setItem('username', session.username);
-            localStorage.setItem('selectedCharacter', JSON.stringify(session.character));
-            
-            // Redirigir según el estado del juego
-            if (response.gameStatus === 'playing') {
-              navigate('/game');
-            } else if (response.gameStatus === 'waiting') {
-              navigate('/waiting-room');
-            }
-          } else {
-            console.log('❌ No se pudo reconectar:', response.error);
-            clearSession();
-          }
-        });
-      };
-      
-      if (socket.connected) {
-        handleConnect();
-      } else {
-        socket.once('connect', handleConnect);
-      }
-    }
-  }, [navigate]);
+  // 🔑 Ya no necesitamos verificar sesiones
+  // Socket.io maneja la reconexión automáticamente con socket.id
 
   const handleCloseLogin = useCallback(() => {
     setShowLogin(false);
@@ -108,7 +55,7 @@ export default function Home() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [showLogin, handleCloseLogin]);
-  
+
   const handlePinChange = (value) => {
     const sanitizedValue = value
       .toUpperCase()
@@ -134,6 +81,8 @@ export default function Home() {
 
         if (response?.success) {
           localStorage.setItem("gamePin", pin);
+
+          // 🔑 Ya no verificamos sesiones, cada pestaña es independiente
           navigate("/join");
           return;
         }
@@ -236,16 +185,6 @@ export default function Home() {
   return (
     <div className={styles.homeContainer}>
       {/* Multi-Account Block Overlay */}
-      {isBlocked && (
-        <MultiAccountBlock 
-          reason={blockReason}
-          onClose={() => {
-            setIsBlocked(false);
-            setBlockReason("");
-          }}
-        />
-      )}
-
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.logoSection}>
@@ -269,7 +208,7 @@ export default function Home() {
               Jugando
             </h1>
             <p className={styles.heroDescription}>
-              Domina los 17 pictogramas de sustancias peligrosas en partidas multijugador 
+              Domina los 17 pictogramas de sustancias peligrosas en partidas multijugador
               emocionantes. Compite, aprende y conviértete en un experto en seguridad.
             </p>
           </div>
@@ -280,7 +219,7 @@ export default function Home() {
               <Play size={24} />
               <h3>Únete a una Partida</h3>
             </div>
-            
+
             <div className={styles.pinInputSection}>
               <input
                 type="text"
@@ -309,88 +248,88 @@ export default function Home() {
             </div>
 
             <div className={styles.pinHelp}>
-            <p>¿No tienes un PIN? <span className={styles.link} onClick={handleCreateGame}>Crea una partida</span></p>
-          </div>
-        </div>
-      </div>
-
-      {/* Features Grid */}
-      <div className={styles.featuresSection}>
-        <h2 className={styles.featuresTitle}>¿Por qué elegir DOT'S GO!!?</h2>
-        <div className={styles.featuresGrid}>
-          {features.map((feature, index) => (
-            <div key={index} className={styles.featureCard}>
-              <div className={styles.featureIcon} style={{backgroundColor: `${feature.color}20`, color: feature.color}}>
-                {feature.icon}
-              </div>
-              <h4 className={styles.featureTitle}>{feature.title}</h4>
-              <p className={styles.featureDescription}>{feature.description}</p>
+              <p>¿No tienes un PIN? <span className={styles.link} onClick={handleCreateGame}>Crea una partida</span></p>
             </div>
-          ))}
-        </div>
-      </div>
-    </main>
-
-    {/* Floating particles animation */}
-    <div className={styles.particles}>
-      {[...Array(8)].map((_, i) => (
-        <div key={i} className={`${styles.particle} ${styles[`particle${i + 1}`]}`}></div>
-      ))}
-    </div>
-
-    {showLogin && (
-      <div className={styles.loginOverlay} onClick={handleCloseLogin}>
-        <div className={styles.loginModal} onClick={(event) => event.stopPropagation()}>
-          <button
-            type="button"
-            className={styles.loginCloseButton}
-            onClick={handleCloseLogin}
-            aria-label="Cerrar formulario de inicio de sesión"
-          >
-            ×
-          </button>
-          <div className={styles.loginHeader}>
-            <h2>Iniciar sesión</h2>
-            <p>Solo usuarios autorizados pueden crear partidas nuevas.</p>
           </div>
-          <form className={styles.loginForm} onSubmit={handleLoginSubmit}>
-            <label className={styles.loginLabel} htmlFor="login-username">
-              Usuario
-            </label>
-            <input
-              id="login-username"
-              type="text"
-              value={credentials.username}
-              onChange={(event) => handleLoginChange("username", event.target.value)}
-              placeholder="Ingresa tu usuario"
-              className={styles.loginInput}
-              autoComplete="username"
-              required
-            />
-
-            <label className={styles.loginLabel} htmlFor="login-password">
-              Contraseña
-            </label>
-            <input
-              id="login-password"
-              type="password"
-              value={credentials.password}
-              onChange={(event) => handleLoginChange("password", event.target.value)}
-              placeholder="Ingresa tu contraseña"
-              className={styles.loginInput}
-              autoComplete="current-password"
-              required
-            />
-
-            {loginError && <p className={styles.loginError}>{loginError}</p>}
-
-            <button type="submit" className={styles.loginButton} disabled={isLoginLoading}>
-              {isLoginLoading ? "Validando..." : "Acceder"}
-            </button>
-          </form>
         </div>
+
+        {/* Features Grid */}
+        <div className={styles.featuresSection}>
+          <h2 className={styles.featuresTitle}>¿Por qué elegir DOT'S GO!!?</h2>
+          <div className={styles.featuresGrid}>
+            {features.map((feature, index) => (
+              <div key={index} className={styles.featureCard}>
+                <div className={styles.featureIcon} style={{ backgroundColor: `${feature.color}20`, color: feature.color }}>
+                  {feature.icon}
+                </div>
+                <h4 className={styles.featureTitle}>{feature.title}</h4>
+                <p className={styles.featureDescription}>{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      {/* Floating particles animation */}
+      <div className={styles.particles}>
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className={`${styles.particle} ${styles[`particle${i + 1}`]}`}></div>
+        ))}
       </div>
-    )}
+
+      {showLogin && (
+        <div className={styles.loginOverlay} onClick={handleCloseLogin}>
+          <div className={styles.loginModal} onClick={(event) => event.stopPropagation()}>
+            <button
+              type="button"
+              className={styles.loginCloseButton}
+              onClick={handleCloseLogin}
+              aria-label="Cerrar formulario de inicio de sesión"
+            >
+              ×
+            </button>
+            <div className={styles.loginHeader}>
+              <h2>Iniciar sesión</h2>
+              <p>Solo usuarios autorizados pueden crear partidas nuevas.</p>
+            </div>
+            <form className={styles.loginForm} onSubmit={handleLoginSubmit}>
+              <label className={styles.loginLabel} htmlFor="login-username">
+                Usuario
+              </label>
+              <input
+                id="login-username"
+                type="text"
+                value={credentials.username}
+                onChange={(event) => handleLoginChange("username", event.target.value)}
+                placeholder="Ingresa tu usuario"
+                className={styles.loginInput}
+                autoComplete="username"
+                required
+              />
+
+              <label className={styles.loginLabel} htmlFor="login-password">
+                Contraseña
+              </label>
+              <input
+                id="login-password"
+                type="password"
+                value={credentials.password}
+                onChange={(event) => handleLoginChange("password", event.target.value)}
+                placeholder="Ingresa tu contraseña"
+                className={styles.loginInput}
+                autoComplete="current-password"
+                required
+              />
+
+              {loginError && <p className={styles.loginError}>{loginError}</p>}
+
+              <button type="submit" className={styles.loginButton} disabled={isLoginLoading}>
+                {isLoginLoading ? "Validando..." : "Acceder"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

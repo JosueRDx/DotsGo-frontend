@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
-import { socket, getSession, clearSession } from '../services/websocket/socketService';
+import { useState, useEffect } from 'react';
+import { socket } from '../services/websocket/socketService';
 
 /**
  * Hook personalizado para manejar reconexión automática
+ * 🔑 Ahora basado en socket.id - Socket.io maneja la reconexión automáticamente
  */
 export const useReconnection = () => {
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -11,7 +12,7 @@ export const useReconnection = () => {
 
   useEffect(() => {
     const handleConnect = () => {
-      console.log('✅ Socket conectado');
+      console.log('✅ Socket conectado:', socket.id);
       setIsConnected(true);
       setIsReconnecting(false);
     };
@@ -38,8 +39,6 @@ export const useReconnection = () => {
     const handleReconnectFailed = () => {
       console.error('❌ Reconexión fallida después de todos los intentos');
       setIsReconnecting(false);
-      // Limpiar sesión si no se pudo reconectar
-      clearSession();
     };
 
     const handlePlayerDisconnected = (data) => {
@@ -58,8 +57,7 @@ export const useReconnection = () => {
     const handlePlayerRemoved = (data) => {
       if (data.reason === 'reconnection_timeout') {
         console.log('⏰ Eliminado por timeout de reconexión');
-        clearSession();
-        // Redirigir al home o mostrar mensaje
+        // Redirigir al home
         window.location.href = '/';
       }
     };
@@ -87,38 +85,12 @@ export const useReconnection = () => {
     };
   }, []);
 
-  const manualReconnect = useCallback(() => {
-    const session = getSession();
-    if (session && session.sessionId && session.pin) {
-      console.log('🔄 Reconexión manual iniciada');
-      setIsReconnecting(true);
-      
-      if (!socket.connected) {
-        socket.connect();
-      }
-      
-      socket.emit('join-game', {
-        pin: session.pin,
-        username: session.username,
-        character: session.character,
-        sessionId: session.sessionId
-      }, (response) => {
-        if (response.success && response.reconnected) {
-          console.log('✅ Reconexión manual exitosa');
-          setIsConnected(true);
-          setIsReconnecting(false);
-        } else {
-          console.error('❌ Reconexión manual fallida:', response.error);
-          setIsReconnecting(false);
-        }
-      });
-    }
-  }, []);
+  // 🔑 Ya no necesitamos reconexión manual
+  // Socket.io maneja todo automáticamente con socket.id
 
   return {
     isConnected,
     isReconnecting,
-    gracePeriodSeconds,
-    manualReconnect
+    gracePeriodSeconds
   };
 };

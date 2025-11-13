@@ -293,6 +293,20 @@ export default function Admin() {
     socket.on("connect", attemptRejoin);
     socket.on("player-left", handlePlayerLeft);
     socket.on("players-updated", handlePlayersUpdated);
+    
+    // Listener para cambios de pestaña
+    socket.on("player-tab-changed", ({ username, exitCount, action }) => {
+      console.log(`👁️ ${username} ${action === 'hidden' ? 'ocultó' : 'mostró'} pestaña - Total: ${exitCount}`);
+      
+      // Actualizar el contador en la lista de jugadores
+      setPlayers(prevPlayers => 
+        prevPlayers.map(player => 
+          player.username === username 
+            ? { ...player, exitCount } 
+            : player
+        )
+      );
+    });
 
     if (socket.connected) {
       attemptRejoin();
@@ -389,6 +403,7 @@ export default function Admin() {
       socket.off("connect", attemptRejoin);
       socket.off("player-left", handlePlayerLeft);
       socket.off("players-updated", handlePlayersUpdated);
+      socket.off("player-tab-changed");
       socket.off("game-started");
       socket.off("ranking-updated");
       socket.off("duplicate-name-attempt");
@@ -539,6 +554,47 @@ export default function Admin() {
     }, (response) => {
       if (!response.success) {
         alert(response.error || "Error al iniciar el match");
+      }
+    });
+  };
+
+  // Función para expulsar un jugador
+  const handleKickPlayer = (player) => {
+    const confirmKick = window.confirm(
+      `¿Estás seguro de que quieres expulsar a ${player.username}?\n\n` +
+      `Esta acción no se puede deshacer y el jugador será eliminado de la partida.`
+    );
+
+    if (!confirmKick) return;
+
+    socket.emit("kick-player", {
+      pin: codigo,
+      playerId: player.id,
+      playerUsername: player.username
+    }, (response) => {
+      if (response.success) {
+        console.log(`✅ Jugador ${player.username} expulsado exitosamente`);
+        
+        // Actualizar lista de jugadores
+        setPlayers(response.updatedPlayers);
+        
+        // Mostrar notificación
+        const notification = {
+          id: Date.now(),
+          type: 'success',
+          title: 'Jugador Expulsado',
+          message: `${player.username} ha sido expulsado de la partida`,
+          timestamp: new Date().toLocaleTimeString()
+        };
+        
+        setNotifications(prev => [...prev, notification]);
+        
+        // Remover notificación después de 5 segundos
+        setTimeout(() => {
+          setNotifications(prev => prev.filter(n => n.id !== notification.id));
+        }, 5000);
+      } else {
+        alert(`Error al expulsar jugador: ${response.error}`);
       }
     });
   };
@@ -814,9 +870,35 @@ export default function Admin() {
                         <p className={styles.noPlayers}>Esperando jugadores...</p>
                       ) : (
                         players.map((player) => (
-                          <div key={player.id} className={styles.playerCard}>
+                          <div 
+                            key={player.id} 
+                            className={`${styles.playerCard} ${!player.isConnected ? styles.disconnected : ''}`}
+                          >
                             <span className={styles.playerAvatar}><Users size={16} /></span>
-                            <p className={styles.playerName}>{player.username}</p>
+                            <div className={styles.playerInfo}>
+                              <p className={styles.playerName}>
+                                {player.username}
+                                {!player.isConnected && <span className={styles.offlineIndicator}> (Desconectado)</span>}
+                              </p>
+                              {/* SIEMPRE mostrar contador de salidas */}
+                              <span 
+                                className={styles.exitBadge} 
+                                title={`Ha salido ${player.exitCount || 0} veces`}
+                                style={{ 
+                                  opacity: (player.exitCount || 0) === 0 ? 0.5 : 1,
+                                  background: (player.exitCount || 0) > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(100, 100, 100, 0.1)'
+                                }}
+                              >
+                                👁️ {player.exitCount || 0}
+                              </span>
+                            </div>
+                            <button
+                              className={styles.kickButton}
+                              onClick={() => handleKickPlayer(player)}
+                              title={`Expulsar a ${player.username}`}
+                            >
+                              ❌
+                            </button>
                           </div>
                         ))
                       )}

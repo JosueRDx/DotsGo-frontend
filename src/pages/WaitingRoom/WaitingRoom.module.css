@@ -1204,3 +1204,26 @@
     font-size: 16px;
   }
 }
+/*
+ Contador de salidas */
+.exitCounter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ef4444;
+}
+
+.exitCounter svg {
+  flex-shrink: 0;
+}
+
+.exitCounter span {
+  line-height: 1;
+}
