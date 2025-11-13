@@ -5,6 +5,7 @@ import styles from "./WaitingRoom.module.css";
 import logo from "../../assets/images/logo.png";
 import { socket, connectSocket } from "../../services/websocket/socketService";
 import { useUserPersistence } from "../../hooks/useUserPersistence";
+import storage from "../../utils/storage"; // Wrapper seguro para localStorage
 
 export default function WaitingRoom() {
   const [players, setPlayers] = useState([]);
@@ -20,10 +21,10 @@ export default function WaitingRoom() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Obtener información del usuario actual
-    const username = localStorage.getItem("username");
-    const characterData = localStorage.getItem("selectedCharacter");
-    const gamePin = localStorage.getItem("gamePin");
+    // Obtener información del usuario actual desde storage seguro
+    const username = storage.getItem("username", null);
+    const characterData = storage.getItem("selectedCharacter", null);
+    const gamePin = storage.getItem("gamePin", null);
 
     if (!username || !characterData || !gamePin) {
       console.log("Datos faltantes, redirigiendo al inicio");
@@ -106,13 +107,13 @@ export default function WaitingRoom() {
               // MEJORADO: Manejo específico de nombres duplicados
               if (response?.error?.includes("Ya existe un jugador con ese nombre")) {
                 alert("⚠️ Nombre ya en uso. Alguien más está usando tu nombre en esta sala. Serás redirigido para elegir otro nombre.");
-                // Limpiar datos y redirigir
-                localStorage.removeItem("username");
-                localStorage.removeItem("selectedCharacter");
+                // Limpiar datos usando storage seguro
+                storage.removeItem("username");
+                storage.removeItem("selectedCharacter");
                 navigate("/join");
               } else if (response?.error?.includes("Juego no encontrado")) {
                 alert("❌ La sala ya no existe. Serás redirigido al inicio.");
-                localStorage.removeItem("gamePin");
+                storage.removeItem("gamePin");
                 navigate("/");
               }
             }
@@ -125,7 +126,8 @@ export default function WaitingRoom() {
     const navigateToGameInProgress = () => {
       if (!autoNavigateRef.current) {
         autoNavigateRef.current = true;
-        localStorage.setItem("joiningInProgress", "true");
+        // Guardar estado usando storage seguro
+        storage.setItem("joiningInProgress", "true");
         navigate("/game");
       }
     };
@@ -171,7 +173,8 @@ export default function WaitingRoom() {
       }
       if (data && data.gameInfo) {
         setGameInfo(data.gameInfo);
-        localStorage.setItem("questionsCount", data.gameInfo.questionsCount);
+        // Guardar cantidad de preguntas usando storage seguro
+        storage.setItem("questionsCount", data.gameInfo.questionsCount.toString());
         if (data.gameInfo.status === "playing") {
           navigateToGameInProgress();
         }
@@ -194,7 +197,8 @@ export default function WaitingRoom() {
           ensurePlayerPresence(response.players);
           if (response.gameInfo) {
             setGameInfo(response.gameInfo);
-            localStorage.setItem("questionsCount", response.gameInfo.questionsCount);
+            // Guardar cantidad de preguntas usando storage seguro
+            storage.setItem("questionsCount", response.gameInfo.questionsCount.toString());
             if (response.gameInfo.status === "playing") {
               navigateToGameInProgress();
             }
@@ -262,14 +266,16 @@ export default function WaitingRoom() {
   }, [countdown, transitionPhase]);
 
   const leaveGame = () => {
-    const gamePin = localStorage.getItem("gamePin");
-    const username = localStorage.getItem("username");
+    // Obtener datos usando storage seguro
+    const gamePin = storage.getItem("gamePin", null);
+    const username = storage.getItem("username", null);
 
     socket.emit("leave-game", { pin: gamePin, username });
 
-    localStorage.removeItem("username");
-    localStorage.removeItem("selectedCharacter");
-    localStorage.removeItem("gamePin");
+    // Limpiar datos usando storage seguro
+    storage.removeItem("username");
+    storage.removeItem("selectedCharacter");
+    storage.removeItem("gamePin");
 
     navigate("/");
   };

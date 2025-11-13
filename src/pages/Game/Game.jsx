@@ -7,6 +7,7 @@ import { CheckCircle, Clock, Zap, Send, AlertCircle, Target, Trophy } from "luci
 
 import { socket } from "../../services/websocket/socketService";
 import { useUserPersistence } from "../../hooks/useUserPersistence";
+import storage from "../../utils/storage";
 import styles from "./Game.module.css";
 
 import {
@@ -204,17 +205,19 @@ export default function Game() {
   }, [timeLeft, hasSubmitted, isSubmitting]);
 
   useEffect(() => {
-    const pin = localStorage.getItem("gamePin");
-    const username = localStorage.getItem("username");
-    const storedCount = localStorage.getItem("questionsCount");
+    // Obtener datos del juego desde storage seguro
+    const pin = storage.getItem("gamePin", null);
+    const username = storage.getItem("username", null);
+    const storedCount = storage.getItem("questionsCount", "0");
     if (storedCount) {
       setTotalQuestions(parseInt(storedCount, 10));
     }
 
-    const joiningFlag = localStorage.getItem("joiningInProgress");
+    // Verificar si el jugador se está uniendo a un juego en progreso
+    const joiningFlag = storage.getItem("joiningInProgress", null);
     if (joiningFlag === "true") {
       joiningInProgressRef.current = true;
-      localStorage.removeItem("joiningInProgress");
+      storage.removeItem("joiningInProgress");
     }
 
     // Guardar ID del socket para identificar respuestas propias
@@ -226,7 +229,8 @@ export default function Game() {
     }
     
     // Cargar información del personaje seleccionado
-    const characterData = localStorage.getItem("selectedCharacter");
+    // Cargar personaje seleccionado desde storage seguro
+    const characterData = storage.getItem("selectedCharacter", null);
     if (characterData) {
       try {
         const character = JSON.parse(characterData);
@@ -369,9 +373,10 @@ export default function Game() {
       console.log("Ganador:", winner);
       console.log("Razón de fin:", endReason);
       
-      localStorage.removeItem("selectedCharacter");
-      localStorage.removeItem("username");
-      localStorage.removeItem("questionsCount");
+      // Limpiar datos del juego usando storage seguro
+      storage.removeItem("selectedCharacter");
+      storage.removeItem("username");
+      storage.removeItem("questionsCount");
       
       navigate("/game-results", { 
         state: { 
@@ -386,9 +391,10 @@ export default function Game() {
 
     socket.on("game-cancelled", () => {
       alert("El juego ha sido cancelado por el administrador");
-      localStorage.removeItem("selectedCharacter");
-      localStorage.removeItem("username");
-      localStorage.removeItem("questionsCount");
+      // Limpiar datos del juego usando storage seguro
+      storage.removeItem("selectedCharacter");
+      storage.removeItem("username");
+      storage.removeItem("questionsCount");
       navigate("/");
     });
 
@@ -529,10 +535,10 @@ export default function Game() {
     socket.on("player-game-over", ({ reason, message, gameMode, finalStats }) => {
       console.log("💀 Game Over recibido:", { reason, message, gameMode, finalStats });
       
-      // Limpiar datos locales
-      localStorage.removeItem("selectedCharacter");
-      localStorage.removeItem("username");
-      localStorage.removeItem("questionsCount");
+      // Limpiar datos locales usando storage seguro
+      storage.removeItem("selectedCharacter");
+      storage.removeItem("username");
+      storage.removeItem("questionsCount");
       
       // Navegar a resultados con datos del jugador eliminado
       navigate("/game-results", { 
@@ -618,8 +624,9 @@ export default function Game() {
       number: number || null
     };
 
-    const pin = localStorage.getItem("gamePin");
-    const username = localStorage.getItem("username");
+    // Obtener datos del juego desde storage seguro
+    const pin = storage.getItem("gamePin", null);
+    const username = storage.getItem("username", null);
     const parsedLimit = Number(questionTimeLimit);
     const parsedTimeLeft = Number(timeLeft);
     const autoResponseTime = Number.isFinite(parsedLimit)
@@ -661,8 +668,9 @@ export default function Game() {
       number: number || null
     };
 
-    const pin = localStorage.getItem("gamePin");
-    const username = localStorage.getItem("username");
+    // Obtener datos del juego desde storage seguro
+    const pin = storage.getItem("gamePin", null);
+    const username = storage.getItem("username", null);
     const responseTime = questionTimeLimit !== null ? questionTimeLimit - timeLeft : 0; // Tiempo que tardó en responder
 
     console.log("Enviando respuesta:", JSON.stringify(answer, null, 2));

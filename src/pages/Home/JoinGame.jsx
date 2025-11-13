@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Users, Play, ArrowLeft, Gamepad2, Zap } from "lucide-react";
 import logo from "../../assets/images/logo.png";
 import { socket, connectSocket } from "../../services/websocket/socketService";
+import storage from "../../utils/storage";
 import styles from "./JoinGame.module.css";
 
 export default function JoinGame() {
@@ -17,10 +18,10 @@ export default function JoinGame() {
   useEffect(() => {
     const pinFromUrl = searchParams.get('pin');
     if (pinFromUrl) {
-      // Guardar el PIN en localStorage para uso posterior
-      localStorage.setItem("gamePin", pinFromUrl);
+      // Guardar el PIN en storage seguro para uso posterior
+      storage.setItem("gamePin", pinFromUrl);
       // Marcar que el PIN viene de un QR escaneado
-      localStorage.setItem("pinFromQR", "true");
+      storage.setItem("pinFromQR", "true");
       console.log(`PIN obtenido de la URL (QR escaneado): ${pinFromUrl}`);
       
       // Mostrar mensaje de confirmación temporal
@@ -33,7 +34,8 @@ export default function JoinGame() {
   }, [searchParams]);
 
   const handleSubmit = () => {
-    const pin = localStorage.getItem("gamePin");
+    // Obtener PIN desde storage seguro
+    const pin = storage.getItem("gamePin", null);
 
     // NUEVO: Validar que existe un PIN
     if (!pin) {
@@ -55,11 +57,11 @@ export default function JoinGame() {
     setError("");
     setSuccessMessage("");
 
-    // Guardar el nombre temporalmente y redirigir a selección de personajes
-    localStorage.setItem("tempUsername", username.trim());
+    // Guardar el nombre temporalmente usando storage seguro y redirigir a selección de personajes
+    storage.setItem("tempUsername", username.trim());
     
     // Limpiar el flag del QR ya que el proceso continúa
-    localStorage.removeItem("pinFromQR");
+    storage.removeItem("pinFromQR");
     
     setTimeout(() => {
       setLoading(false);
@@ -74,12 +76,13 @@ export default function JoinGame() {
   };
 
   const goBack = () => {
-    // Limpiar el flag del QR al salir
-    localStorage.removeItem("pinFromQR");
+    // Limpiar el flag del QR al salir usando storage seguro
+    storage.removeItem("pinFromQR");
     navigate("/");
   };
 
-  const gamePin = localStorage.getItem("gamePin");
+  // Obtener PIN del juego desde storage seguro
+  const gamePin = storage.getItem("gamePin", null);
 
   return (
     <div className={styles.joinWrapper}>
@@ -123,7 +126,7 @@ export default function JoinGame() {
             <div className={styles.pinDisplay}>
               <span className={styles.pinLabel}>PIN del Juego:</span>
               <span className={styles.pinValue}>{gamePin}</span>
-              {localStorage.getItem("pinFromQR") === "true" && (
+              {storage.getItem("pinFromQR", null) === "true" && (
                 <span className={styles.qrBadge}>📱 Escaneado</span>
               )}
             </div>
