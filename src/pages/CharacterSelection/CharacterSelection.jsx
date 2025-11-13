@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Play, Users, Star, Zap, CheckCircle } from "lucide-react";
 import styles from "./CharacterSelection.module.css";
 import logo from "../../assets/images/logo.png";
-import { socket, connectSocket, saveSession, getSession, saveGameData } from "../../services/websocket/socketService";
+import { socket, connectSocket, saveSession, getSession, saveGameData, hasActiveTabWithSession } from "../../services/websocket/socketService";
 import MultiAccountBlock from "../../components/MultiAccountBlock";
 
 // Importar imágenes de personajes
@@ -28,27 +28,70 @@ export default function CharacterSelection() {
   const [blockReason, setBlockReason] = useState("");
   const navigate = useNavigate();
 
-  // NUEVO: Verificar multicuenta al cargar el componente
+  // NUEVO: Verificar sesión existente al cargar
   React.useEffect(() => {
-    // Verificar si hay una sesión activa en localStorage
     const existingSession = getSession();
     const currentPin = localStorage.getItem("gamePin");
+    const currentUsername = localStorage.getItem("tempUsername");
+    
+    // NUEVO: Verificar si hay otra pestaña activa
+    if (hasActiveTabWithSession()) {
+      console.log('🚫 Otra pestaña activa detectada');
+      const session = getSession();
+      setBlockReason(`Ya estás jugando como "${session.username}" en otra pestaña. Cierra la otra pestaña primero.`);
+      setIsBlocked(true);
+      return;
+    }
     
     if (existingSession && existingSession.pin === currentPin) {
-      // Hay una sesión activa en este juego
-      const currentUsername = localStorage.getItem("tempUsername");
-      
-      // Si el username es diferente, es un intento de multicuenta
-      if (existingSession.username !== currentUsername) {
-        console.log('🚫 Multicuenta detectada en frontend');
-        console.log('   Usuario existente:', existingSession.username);
-        console.log('   Intento:', currentUsername);
+      // Caso 1: Mismo usuario regresando (PERMITIR - saltar selección)
+      if (existingSession.username === currentUsername) {
+        console.log('✅ Usuario regresando detectado:', currentUsername);
+        console.log('   Personaje guardado:', existingSession.character?.name);
         
-        setBlockReason(`Ya estás jugando como "${existingSession.username}". No puedes crear otra cuenta.`);
-        setIsBlocked(true);
+        // Restaurar datos del usuario
+        localStorage.setItem("username", currentUsername);
+        localStorage.setItem("selectedCharacter", JSON.stringify(existingSession.character));
+        
+        // Reconectar automáticamente con personaje guardado
+        setLoading(true);
+        connectSocket();
+        
+        socket.emit("join-game", { 
+          pin: currentPin, 
+          username: currentUsername, 
+          character: existingSession.character,
+          sessionId: existingSession.sessionId
+        }, (response) => {
+          setLoading(false);
+          
+          if (response.success) {
+            console.log('✅ Reconexión automática exitosa');
+            
+            // Redirigir según estado del juego
+            if (response.gameStatus === 'playing') {
+              navigate('/game');
+            } else {
+              navigate('/waiting-room');
+            }
+          } else {
+            console.log('❌ Error en reconexión:', response.error);
+            // Si falla, permitir seleccionar personaje de nuevo
+          }
+        });
+        
+        return; // Salir del useEffect
       }
+      
+      // Caso 2: Usuario diferente (BLOQUEAR - multicuenta)
+      console.log('🚫 Multicuenta detectada en frontend');
+      console.log('   Usuario existente:', existingSession.username);
+      console.log('   Intento:', currentUsername);
+      
+      setBlockReason(`Ya estás jugando como "${existingSession.username}". No puedes crear otra cuenta.`);
+      setIsBlocked(true);
     }
-  }, []);
+  }, [navigate]);
 
   // Datos de los personajes
   const characters = [

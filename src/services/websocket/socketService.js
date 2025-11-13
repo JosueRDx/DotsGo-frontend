@@ -16,16 +16,27 @@ export const socket = io(API_URL, {
 // Gestión de sesión persistente
 const SESSION_STORAGE_KEY = 'dotsgo_session';
 const GAME_DATA_KEY = 'dotsgo_game_data';
+const ACTIVE_TAB_KEY = 'dotsgo_active_tab';
+
+// Generar ID único para esta pestaña
+const TAB_ID = `tab_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
 /**
  * Guarda la sesión del jugador en localStorage
  */
 export const saveSession = (sessionData) => {
   try {
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+    const sessionWithTab = {
       ...sessionData,
-      timestamp: Date.now()
-    }));
+      timestamp: Date.now(),
+      tabId: TAB_ID
+    };
+    
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionWithTab));
+    
+    // Marcar esta pestaña como activa
+    localStorage.setItem(ACTIVE_TAB_KEY, TAB_ID);
+    
     console.log('✅ Sesión guardada:', sessionData);
   } catch (error) {
     console.error('Error guardando sesión:', error);
@@ -52,7 +63,6 @@ export const getSession = () => {
       return null;
     }
     
-    console.log(`📦 Sesión recuperada de ${source} (pestaña: ${getTabId()})`);
     return session;
   } catch (error) {
     console.error('Error recuperando sesión:', error);
@@ -61,17 +71,41 @@ export const getSession = () => {
 };
 
 /**
- * Limpia la sesión
+ * Limpia la sesión del localStorage
  */
 export const clearSession = () => {
   try {
-    sessionStorage.removeItem(SESSION_STORAGE_KEY);
-    sessionStorage.removeItem(GAME_DATA_KEY);
     localStorage.removeItem(SESSION_STORAGE_KEY);
     localStorage.removeItem(GAME_DATA_KEY);
-    console.log('🗑️ Sesión limpiada (pestaña:', getTabId(), ')');
+    localStorage.removeItem(ACTIVE_TAB_KEY);
+    console.log('🗑️ Sesión limpiada');
   } catch (error) {
     console.error('Error limpiando sesión:', error);
+  }
+};
+
+/**
+ * Verifica si hay otra pestaña activa con sesión
+ * @returns {boolean} True si hay otra pestaña activa
+ */
+export const hasActiveTabWithSession = () => {
+  try {
+    const session = getSession();
+    if (!session) return false;
+    
+    const activeTabId = localStorage.getItem(ACTIVE_TAB_KEY);
+    
+    // Si no hay pestaña activa marcada, esta es la primera
+    if (!activeTabId) return false;
+    
+    // Si la pestaña activa es esta misma, no hay conflicto
+    if (activeTabId === TAB_ID) return false;
+    
+    // Hay otra pestaña activa
+    return true;
+  } catch (error) {
+    console.error('Error verificando pestaña activa:', error);
+    return false;
   }
 };
 
@@ -202,5 +236,14 @@ socket.on('disconnect', (reason) => {
   if (reason === 'io server disconnect') {
     // El servidor forzó la desconexión, reconectar manualmente
     socket.connect();
+  }
+});
+
+// Limpiar marca de pestaña activa al cerrar/recargar
+window.addEventListener('beforeunload', () => {
+  const activeTabId = localStorage.getItem(ACTIVE_TAB_KEY);
+  if (activeTabId === TAB_ID) {
+    localStorage.removeItem(ACTIVE_TAB_KEY);
+    console.log('🗑️ Marca de pestaña activa limpiada');
   }
 });
