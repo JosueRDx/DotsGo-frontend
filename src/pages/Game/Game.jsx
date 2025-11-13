@@ -287,6 +287,12 @@ export default function Game() {
           if (response.modeConfig && response.modeConfig.maxLives) {
             setMaxLives(response.modeConfig.maxLives);
           }
+          
+          // NUEVO: Inicializar vidas del jugador desde la respuesta
+          if (response.playerData && typeof response.playerData.lives === 'number') {
+            setPlayerLives(response.playerData.lives);
+            console.log("💖 Vidas del jugador inicializadas:", response.playerData.lives);
+          }
         } else {
           console.log("⚠ No hay pregunta activa en este momento");
           // Mantener gameHasStarted en true pero sin pregunta
@@ -313,7 +319,7 @@ export default function Game() {
     });
 
     // Escuchar nueva pregunta (para cuando cambie)
-    socket.on("game-started", ({ question, timeLimit, currentIndex, totalQuestions: totalQ }) => {
+    socket.on("game-started", ({ question, timeLimit, currentIndex, totalQuestions: totalQ, gameMode: mode, modeConfig }) => {
       console.log("🎯 Nueva pregunta recibida via game-started:", question.title);
       
       // Cerrar respuestas correctas si están abiertas
@@ -335,10 +341,20 @@ export default function Game() {
       setQuestionIndex(currentIndex || 1);
       setTotalQuestions(totalQ || totalQuestions);
       setGameHasStarted(true);
+      
+      // NUEVO: Actualizar modo de juego y configuración
+      if (mode) {
+        setGameMode(mode);
+        console.log("🎮 Modo de juego actualizado:", mode);
+      }
+      if (modeConfig && modeConfig.maxLives) {
+        setMaxLives(modeConfig.maxLives);
+        console.log("💖 Vidas máximas configuradas:", modeConfig.maxLives);
+      }
     });
 
     // Escuchar siguiente pregunta
-    socket.on("next-question", ({ question, timeLimit, currentIndex, totalQuestions: totalQ }) => {
+    socket.on("next-question", ({ question, timeLimit, currentIndex, totalQuestions: totalQ, gameMode: mode, modeConfig }) => {
       console.log("🎯 Siguiente pregunta recibida:", question.title);
       
       // Cerrar respuestas correctas si están abiertas
@@ -360,6 +376,14 @@ export default function Game() {
       setQuestionIndex(currentIndex || questionIndex + 1);
       setTotalQuestions(totalQ || totalQuestions);
       setGameHasStarted(true);
+      
+      // NUEVO: Actualizar modo de juego y configuración
+      if (mode) {
+        setGameMode(mode);
+      }
+      if (modeConfig && modeConfig.maxLives) {
+        setMaxLives(modeConfig.maxLives);
+      }
     });
 
     socket.on("game-ended", ({ results, hasWinner, gameMode: endGameMode, winner, endReason }) => {
@@ -423,6 +447,8 @@ export default function Game() {
 
     // NUEVO: Escuchar actualizaciones de ranking (incluye info de vidas)
     socket.on("ranking-updated", ({ players, gameMode: mode, modeConfig }) => {
+      const currentSocketId = socket.id;
+      
       if (mode) {
         setGameMode(mode);
       }
@@ -431,36 +457,61 @@ export default function Game() {
       }
       
       // Encontrar las vidas y posición del jugador actual (solo para modos que las usen)
-      const currentPlayer = players.find(p => p.id === socketId);
+      const currentPlayer = players.find(p => p.id === currentSocketId);
+      
+      console.log(`📊 Ranking actualizado. Buscando jugador con ID: ${currentSocketId}`);
+      console.log(`📊 Jugadores en ranking:`, players.map(p => ({ id: p.id, username: p.username, lives: p.lives })));
+      
       if (currentPlayer && (mode === 'adventure' || mode === 'duel')) {
+        console.log(`✅ Jugador encontrado en ranking:`, { 
+          username: currentPlayer.username, 
+          lives: currentPlayer.lives,
+          position: currentPlayer.position 
+        });
+        
         // Actualizar vidas (solo en modos que las usen)
         if (typeof currentPlayer.lives === 'number') {
-          const previousLives = playerLives;
-          
-          // Solo actualizar si realmente cambió
-          if (previousLives !== currentPlayer.lives) {
-            setPlayerLives(currentPlayer.lives);
-            console.log(`🔄 Vidas actualizadas via ranking: ${previousLives} → ${currentPlayer.lives}`);
-          }
+          setPlayerLives(prevLives => {
+            if (prevLives !== currentPlayer.lives) {
+              console.log(`🔄 Vidas actualizadas via ranking: ${prevLives} → ${currentPlayer.lives}`);
+              return currentPlayer.lives;
+            }
+            return prevLives;
+          });
         }
         
         // Actualizar posición (para modo duelo)
         if (typeof currentPlayer.position === 'number') {
           setPlayerPosition(currentPlayer.position);
         }
+      } else {
+        console.log(`⚠️ Jugador NO encontrado en ranking o modo incorrecto`);
       }
     });
 
     // NUEVO: Escuchar pérdida de vida
     socket.on("player-life-lost", ({ playerId, livesRemaining, mode }) => {
-      if (playerId === socketId) {
-        const previousLives = playerLives;
+      const currentSocketId = socket.id;
+      console.log(`📡 Evento player-life-lost recibido:`, { 
+        playerId, 
+        livesRemaining, 
+        mode, 
+        mySocketId: currentSocketId,
+        stateSocketId: socketId,
+        match: playerId === currentSocketId
+      });
+      
+      if (playerId === currentSocketId) {
+        console.log(`💔 ¡ES MI EVENTO! Actualizando vidas de ${playerLives} a ${livesRemaining}`);
         
-        // Marcar qué vida se perdió para la animación (la última vida activa)
-        setLostLifeIndex(previousLives - 1); // La vida que se perdió es la última que estaba activa
-        
-        setPlayerLives(livesRemaining);
-        console.log(`💔 Perdiste una vida. Vidas restantes: ${livesRemaining} (modo: ${mode})`);
+        setPlayerLives(prevLives => {
+          console.log(`🔄 setPlayerLives: ${prevLives} → ${livesRemaining}`);
+          
+          // Marcar qué vida se perdió para la animación
+          setLostLifeIndex(prevLives - 1);
+          
+          return livesRemaining;
+        });
         
         // Mostrar notificación visual de pérdida de vida
         setSubmissionStatus('life-lost');
@@ -473,9 +524,8 @@ export default function Game() {
           // Limpiar la animación de pérdida de vida
           setLostLifeIndex(-1);
         }, 3000); // 3 segundos para mostrar la notificación
-        
-        // Log adicional para debugging
-        console.log(`🔄 Vidas actualizadas: ${previousLives} → ${livesRemaining}, vida perdida en índice: ${previousLives - 1}`);
+      } else {
+        console.log(`ℹ️ Otro jugador perdió una vida (playerId: ${playerId}, yo: ${currentSocketId})`);
       }
     });
 
