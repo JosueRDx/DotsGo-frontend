@@ -25,9 +25,29 @@ import personaje3 from "../../assets/images/personajes/3.png";
 import personaje4 from "../../assets/images/personajes/4.png";
 import personaje5 from "../../assets/images/personajes/5.png";
 import personaje6 from "../../assets/images/personajes/6.png";
+import personaje7 from "../../assets/images/personajes/7.png";
+import personaje8 from "../../assets/images/personajes/8.png";
+import personaje9 from "../../assets/images/personajes/9.png";
+import personaje10 from "../../assets/images/personajes/10.png";
+import personaje11 from "../../assets/images/personajes/11.png";
 import { API_URL, FRONTEND_URL } from "../../utils/constants";
 
 const GAME_STATE_STORAGE_KEY = "adminGameState";
+
+// Mapeo de imágenes de personajes
+const characterImages = {
+  1: personaje1,
+  2: personaje2,
+  3: personaje3,
+  4: personaje4,
+  5: personaje5,
+  6: personaje6,
+  7: personaje7,
+  8: personaje8,
+  9: personaje9,
+  10: personaje10,
+  11: personaje11
+};
 
 export default function Admin() {
   const [activeSection, setActiveSection] = useState('crear-juego');
@@ -874,7 +894,17 @@ export default function Admin() {
                             key={player.id} 
                             className={`${styles.playerCard} ${!player.isConnected ? styles.disconnected : ''}`}
                           >
-                            <span className={styles.playerAvatar}><Users size={16} /></span>
+                            <div className={styles.playerAvatar}>
+                              {player.character && player.character.id && characterImages[player.character.id] ? (
+                                <img 
+                                  src={characterImages[player.character.id]} 
+                                  alt={player.character.name || 'Personaje'}
+                                  className={styles.characterImage}
+                                />
+                              ) : (
+                                <Users size={16} />
+                              )}
+                            </div>
                             <div className={styles.playerInfo}>
                               <p className={styles.playerName}>
                                 {player.username}
