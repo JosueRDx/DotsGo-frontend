@@ -4,6 +4,7 @@ import { Gamepad2, Users, Zap, Trophy, Play, ArrowRight } from "lucide-react";
 import styles from "./Home.module.css";
 import logo from "../../assets/images/logo.png";
 import { socket, connectSocket } from "../../services/websocket/socketService";
+import storage from "../../utils/storage";
 
 const VALID_USERNAME = "fernando25";
 const VALID_PASSWORD = "mineria25";
@@ -77,7 +78,8 @@ export default function Home() {
         setIsLoading(false);
 
         if (response?.success) {
-          localStorage.setItem("gamePin", pin);
+          // Guardar PIN usando storage seguro
+          storage.setItem("gamePin", pin);
           navigate("/join");
           return;
         }

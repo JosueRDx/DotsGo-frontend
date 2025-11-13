@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeSVG } from 'qrcode.react';
 import { socket, connectSocket, disconnectSocket } from "../../services/websocket/socketService";
+import storage from "../../utils/storage";
 import {
   Gamepad2,
   BookOpen,
@@ -114,14 +115,15 @@ export default function Admin() {
     if (typeof window === "undefined") return;
 
     try {
-      const existingStateJSON = localStorage.getItem(GAME_STATE_STORAGE_KEY);
+      // Obtener estado existente usando storage seguro
+      const existingStateJSON = storage.getItem(GAME_STATE_STORAGE_KEY, null);
       const existingState = existingStateJSON ? JSON.parse(existingStateJSON) : {};
       const updatedState = { ...existingState, ...newState };
 
       if (Object.keys(updatedState).length === 0) {
-        localStorage.removeItem(GAME_STATE_STORAGE_KEY);
+        storage.removeItem(GAME_STATE_STORAGE_KEY);
       } else {
-        localStorage.setItem(GAME_STATE_STORAGE_KEY, JSON.stringify(updatedState));
+        storage.setItem(GAME_STATE_STORAGE_KEY, JSON.stringify(updatedState));
       }
     } catch (error) {
       console.error("Error al guardar el estado del juego:", error);
@@ -146,7 +148,8 @@ export default function Admin() {
 
     if (typeof window !== "undefined") {
       try {
-        localStorage.removeItem(GAME_STATE_STORAGE_KEY);
+        // Limpiar estado usando storage seguro
+        storage.removeItem(GAME_STATE_STORAGE_KEY);
       } catch (error) {
         console.error("Error al limpiar el estado del juego:", error);
       }
@@ -215,7 +218,8 @@ export default function Admin() {
     const restoreSavedGame = () => {
       if (typeof window === "undefined") return;
 
-      const savedGameJSON = localStorage.getItem(GAME_STATE_STORAGE_KEY);
+      // Obtener estado guardado usando storage seguro
+      const savedGameJSON = storage.getItem(GAME_STATE_STORAGE_KEY, null);
       if (!savedGameJSON) return;
 
       try {
@@ -245,14 +249,15 @@ export default function Admin() {
         }
       } catch (error) {
         console.error("Error al restaurar el estado del juego guardado:", error);
-        localStorage.removeItem(GAME_STATE_STORAGE_KEY);
+        storage.removeItem(GAME_STATE_STORAGE_KEY);
       }
     };
 
     const attemptRejoin = () => {
       if (typeof window === "undefined") return;
 
-      const savedGameJSON = localStorage.getItem(GAME_STATE_STORAGE_KEY);
+      // Obtener estado guardado usando storage seguro
+      const savedGameJSON = storage.getItem(GAME_STATE_STORAGE_KEY, null);
       if (!savedGameJSON) return;
 
       let savedGame;
@@ -260,7 +265,7 @@ export default function Admin() {
         savedGame = JSON.parse(savedGameJSON);
       } catch (error) {
         console.error("Error al parsear estado de juego almacenado:", error);
-        localStorage.removeItem(GAME_STATE_STORAGE_KEY);
+        storage.removeItem(GAME_STATE_STORAGE_KEY);
         return;
       }
 

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import storage from '../utils/storage';
 
 /**
  * Hook personalizado para manejar la autenticación de usuarios
@@ -10,11 +11,11 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Verificar si hay un usuario guardado en localStorage al cargar
+  // Verificar si hay un usuario guardado usando storage seguro al cargar
   useEffect(() => {
     const checkAuth = () => {
       try {
-        const storedUser = localStorage.getItem('user');
+        const storedUser = storage.getItem('user', null);
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           setUser(userData);
@@ -57,8 +58,8 @@ export const useAuth = () => {
         createdAt: new Date().toISOString()
       };
 
-      // Guardar en localStorage
-      localStorage.setItem('user', JSON.stringify(userData));
+      // Guardar usando storage seguro
+      storage.setItem('user', JSON.stringify(userData));
       
       setUser(userData);
       setIsAuthenticated(true);
@@ -101,7 +102,8 @@ export const useAuth = () => {
         createdAt: new Date().toISOString()
       };
 
-      localStorage.setItem('user', JSON.stringify(newUser));
+      // Guardar usando storage seguro
+      storage.setItem('user', JSON.stringify(newUser));
       
       setUser(newUser);
       setIsAuthenticated(true);
@@ -120,7 +122,8 @@ export const useAuth = () => {
    */
   const logout = useCallback(() => {
     try {
-      localStorage.removeItem('user');
+      // Remover usando storage seguro
+      storage.removeItem('user');
       setUser(null);
       setIsAuthenticated(false);
       setError(null);
@@ -147,7 +150,8 @@ export const useAuth = () => {
         updatedAt: new Date().toISOString()
       };
 
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      // Actualizar usando storage seguro
+      storage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
 
       return { success: true, user: updatedUser };
@@ -169,7 +173,7 @@ export const useAuth = () => {
    */
   const getToken = useCallback(() => {
     try {
-      return localStorage.getItem('authToken');
+      return storage.getItem('authToken', null);
     } catch (err) {
       console.error('Error al obtener token:', err);
       return null;
@@ -182,9 +186,9 @@ export const useAuth = () => {
   const setToken = useCallback((token) => {
     try {
       if (token) {
-        localStorage.setItem('authToken', token);
+        storage.setItem('authToken', token);
       } else {
-        localStorage.removeItem('authToken');
+        storage.removeItem('authToken');
       }
       return { success: true };
     } catch (err) {

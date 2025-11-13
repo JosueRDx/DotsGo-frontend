@@ -1,5 +1,6 @@
 import React from 'react';
 import { useUserPersistence } from '../../hooks/useUserPersistence';
+import storage from '../../utils/storage';
 
 /**
  * Componente de desarrollo para mostrar el estado de persistencia del usuario
@@ -14,7 +15,8 @@ export default function UserPersistenceStatus() {
 
   const savedUsername = getSavedUsername();
   const inGame = isInGame();
-  const selectedCharacterData = localStorage.getItem('selectedCharacter');
+  // Obtener datos usando storage seguro
+  const selectedCharacterData = storage.getItem('selectedCharacter', null);
   const userProgress = savedUsername ? getUserProgress(savedUsername) : null;
   
   let selectedCharacter = null;
@@ -40,7 +42,7 @@ export default function UserPersistenceStatus() {
     }}>
       <div>👤 Usuario: {savedUsername || 'No guardado'}</div>
       <div>🎮 En juego: {inGame ? 'Sí' : 'No'}</div>
-      <div>📍 PIN: {localStorage.getItem('gamePin') || 'N/A'}</div>
+      <div>📍 PIN: {storage.getItem('gamePin', null) || 'N/A'}</div>
       <div>🎭 Personaje: {selectedCharacter?.name || 'No seleccionado'}</div>
       {userProgress && (
         <div>💾 Progreso: {userProgress.selectedCharacter?.name || 'Sin personaje guardado'}</div>

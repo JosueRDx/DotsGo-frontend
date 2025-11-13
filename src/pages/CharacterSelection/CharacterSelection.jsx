@@ -4,6 +4,7 @@ import { ArrowLeft, Play, Users, Star, Zap, CheckCircle } from "lucide-react";
 import styles from "./CharacterSelection.module.css";
 import logo from "../../assets/images/logo.png";
 import { socket, connectSocket } from "../../services/websocket/socketService";
+import storage from "../../utils/storage";
 
 // Importar imágenes de personajes
 import personaje1 from "../../assets/images/personajes/1.png";
@@ -144,8 +145,9 @@ export default function CharacterSelection() {
       return;
     }
 
-    const pin = localStorage.getItem("gamePin");
-    const username = localStorage.getItem("tempUsername");
+    // Obtener datos desde storage seguro
+    const pin = storage.getItem("gamePin", null);
+    const username = storage.getItem("tempUsername", null);
 
     if (!username) {
       setError("Error: Nombre de usuario no encontrado");
@@ -170,23 +172,23 @@ export default function CharacterSelection() {
     }, (response) => {
       setLoading(false);
       if (response.success) {
-        // NUEVO: Guardar datos persistentes del jugador
-        localStorage.setItem("username", username);
-        localStorage.setItem("selectedCharacter", JSON.stringify(selectedCharacter));
+        // Guardar datos persistentes del jugador usando storage seguro
+        storage.setItem("username", username);
+        storage.setItem("selectedCharacter", JSON.stringify(selectedCharacter));
 
         if (typeof response.totalQuestions === "number") {
-          localStorage.setItem("questionsCount", response.totalQuestions);
+          storage.setItem("questionsCount", response.totalQuestions.toString());
         }
         
-        // Limpiar datos temporales
-        localStorage.removeItem("tempUsername");
+        // Limpiar datos temporales usando storage seguro
+        storage.removeItem("tempUsername");
         const joiningInProgress = response.gameStatus === "playing";
         if (joiningInProgress) {
-          localStorage.setItem("joiningInProgress", "true");
+          storage.setItem("joiningInProgress", "true");
           console.log("Conectado a una partida en curso");
           navigate("/game");
         } else {
-          localStorage.removeItem("joiningInProgress");
+          storage.removeItem("joiningInProgress");
           console.log("Conectado al juego con personaje seleccionado");
           navigate("/waiting-room");
         }
@@ -213,8 +215,9 @@ export default function CharacterSelection() {
     navigate("/join");
   };
 
-  const gamePin = localStorage.getItem("gamePin");
-  const username = localStorage.getItem("tempUsername");
+  // Obtener datos desde storage seguro
+  const gamePin = storage.getItem("gamePin", null);
+  const username = storage.getItem("tempUsername", null);
 
   return (
     <div className={styles.selectionWrapper}>
