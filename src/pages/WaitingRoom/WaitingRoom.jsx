@@ -15,6 +15,7 @@ export default function WaitingRoom() {
   const [countdown, setCountdown] = useState(null);
   const [isGameStarting, setIsGameStarting] = useState(false);
   const [transitionPhase, setTransitionPhase] = useState('waiting'); // 'waiting', 'countdown', 'starting', 'transitioning'
+  const [isLeavingGame, setIsLeavingGame] = useState(false);
   const { restoreUserProgress } = useUserPersistence();
   const autoNavigateRef = useRef(false);
   const rejoinAttemptedRef = useRef(false);
@@ -84,6 +85,11 @@ export default function WaitingRoom() {
     connectSocket();
 
     const ensurePlayerPresence = (playerList = []) => {
+      // No intentar rejoin si el jugador está saliendo voluntariamente
+      if (isLeavingGame) {
+        return;
+      }
+
       const isPlayerPresent = playerList.some((player) => player.username === username);
       if (isPlayerPresent) {
         rejoinAttemptedRef.current = true;
@@ -266,6 +272,9 @@ export default function WaitingRoom() {
   }, [countdown, transitionPhase]);
 
   const leaveGame = () => {
+    // Activar flag para prevenir rejoin automático
+    setIsLeavingGame(true);
+
     // Obtener datos usando storage seguro
     const gamePin = storage.getItem("gamePin", null);
     const username = storage.getItem("username", null);
