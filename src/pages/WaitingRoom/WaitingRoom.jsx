@@ -286,7 +286,7 @@ export default function WaitingRoom() {
     storage.removeItem("selectedCharacter");
     storage.removeItem("gamePin");
 
-    navigate("/");
+    navigate("/join");
   };
 
   const isHost = currentUser && players.length > 0 && players[0]?.username === currentUser.username;
