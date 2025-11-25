@@ -519,20 +519,65 @@
 @media (max-width: 768px) {
   .header {
     padding: 15px 20px;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
   }
 
   .logoSection {
-    gap: 15px;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  .gameTitle {
+    min-width: 0;
+    overflow: hidden;
   }
 
   .gameTitle h2 {
-    font-size: 20px;
+    font-size: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .connectionStatus {
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   .gameInfo {
-    gap: 15px;
+    gap: 10px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pinDisplay {
+    padding: 8px 14px;
+    font-size: 13px;
+    flex: 1;
+    text-align: center;
+  }
+
+  .pinDisplay span {
+    letter-spacing: 1px;
+  }
+
+  .leaveButton {
+    padding: 8px 16px;
+    font-size: 13px;
+    flex-shrink: 0;
   }
 
   .mainContent {
@@ -573,30 +618,58 @@
 
 @media (max-width: 480px) {
   .header {
-    padding: 12px 15px;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .logoSection {
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
   }
 
   .logo {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
   }
 
   .gameTitle h2 {
-    font-size: 18px;
+    font-size: 16px;
+  }
+
+  .connectionStatus {
+    font-size: 10px;
+  }
+
+  .connectionStatus svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .gameInfo {
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .pinDisplay {
-    padding: 8px 16px;
-    font-size: 14px;
+    padding: 8px 12px;
+    font-size: 13px;
+    width: 100%;
+  }
+
+  .pinDisplay span {
+    letter-spacing: 1.5px;
   }
 
   .leaveButton {
     padding: 8px 16px;
-    font-size: 13px;
+    font-size: 12px;
+    width: 100%;
   }
 
   .mainContent {
-    padding: 150px 15px 30px;
+    padding: 170px 12px 30px;
   }
 
   .playersGrid {
@@ -612,10 +685,19 @@
 
   .countdownCard {
     padding: 25px;
+    margin: 15px;
   }
 
   .countdownNumber {
     font-size: 50px;
+  }
+
+  .countdownCard h2 {
+    font-size: 20px;
+  }
+
+  .countdownCard p {
+    font-size: 14px;
   }
 }
 
